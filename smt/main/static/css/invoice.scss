@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root{
+    font-size: 16px;
+}
+
+*{
+    padding: 0%;
+    margin: 0%;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: "poppins";
+    background-color: aquamarine;
+    display: flex;
+    justify-content: center;
+}
+
+.invoice{
+    background-color: white;
+    padding:0.5in;
+    width: 8.3in;
+
+    .line{
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        h2{
+            font-size: 18.62px;
+        }
+        h1{
+            font-size: 26.6px;
+            color: #7f7f7f;
+        }
+    }
+
+    .info{
+        margin-top: 1.3rem;
+        display: flex;
+        justify-content: space-between;
+
+        .sec{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+    }
+    .bill-to{
+        margin-top: 1.5rem;
+        .head{
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .party-info{
+            margin-top: .5rem;
+            font-size: .9rem;
+            font-weight: 400;
+            .party-name{
+                font-size: 1.1rem;
+                font-weight: 600;
+                margin-bottom: .1rem;
+            }
+        }
+    }
+
+    
+    .main-table{
+        margin-top: 2rem;
+        border-collapse: collapse;
+        width: 100%;
+
+        th,td{
+            border: 1px solid black;
+            padding: .3rem;
+            &:has(.sub-table){
+                padding: 0;
+            }
+        }
+
+        .total{
+            font-size: 1.2rem;
+        }
+        
+    } 
+    .sub-table{
+        border-collapse: collapse;
+        width: 100%;
+
+        tr:not(:last-child){
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        th,td{ 
+            border: none;
+        }
+
+        &.right{
+            th,td{
+                text-align: end;
+            }
+        }
+    }
+}
+
+@media print {
+
+    .invoice{
+        padding: 0% !important;
+    }
+
+    body {
+        background-color: white !important;
+    }
+}
