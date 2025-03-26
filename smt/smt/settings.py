@@ -64,14 +64,6 @@ DATABASES = {
     'default': dj_database_url.config(default=os.getenv("DATABASE_URL"))
 }
 
-# Use SQLite as the default database for development
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # Authentication settings
 LOGIN_URL = 'login'  # This tells Django to use our login view when @login_required is triggered
 
