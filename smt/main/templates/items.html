@@ -1,0 +1,398 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Items</title>
+    <link rel="stylesheet" href="{% static 'css/items.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <!-- Add SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.min.css">
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+            Back to home
+        </a>
+        <h2>Items</h2>
+    </nav>
+    <button id="themeToggle" aria-label="Toggle dark/light theme" 
+            style="position: absolute; top: 1rem; right: 1rem; padding: 0.5rem; 
+                   background: var(--primary-color); border: none; border-radius: 50%; 
+                   cursor: pointer; width: 40px; height: 40px; display: flex; 
+                   align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
+            <path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm0-18c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8z"/>
+            <path d="M12 17v-10v10z" fill="currentColor"/>
+        </svg>
+    </button>
+    <div class="item-grid">
+        {% for item in items %}
+            <div class="item-card" data-id="{{ item.id }}" data-name="{{ item.name }}">
+                <div class="avatar">{{ item.name|slice:":1" }}</div>
+                <div class="item-info">
+                    <p>{{ item.name }}</p>
+                </div>
+                <div class="item-actions">
+                    <button class="edit-btn" title="Edit item">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" width="18">
+                            <path d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                    </button>
+                    <button class="delete-btn" title="Delete item">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" width="18">
+                            <path d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+        
+        <!-- Add New Item Card -->
+        <div class="item-card add-item-card" id="addItemBtn">
+            <div class="avatar add-icon">+</div>
+            <div class="item-info">
+                <p>Add New Item</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Item</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addItemForm">
+                    <div class="form-group">
+                        <label for="itemName">Item Name*</label>
+                        <input type="text" id="itemName" name="name" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+                        <button type="submit" class="btn-submit">Add Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="editItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Item</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editItemForm">
+                    <input type="hidden" id="editItemId">
+                    <div class="form-group">
+                        <label for="editItemName">Item Name*</label>
+                        <input type="text" id="editItemName" name="name" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" id="editCancelBtn">Cancel</button>
+                        <button type="submit" class="btn-submit">Update Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.all.min.js"></script>
+    
+    <script>
+        // Configure SweetAlert2 to match your theme
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 1000,  // Changed to 1000ms (1 second)
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        // Theme toggle functionality
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('light-theme');
+            // Save preference to localStorage
+            if (document.body.classList.contains('light-theme')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        
+        // Check for saved theme preference
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+            }
+            
+            // Modal functionality
+            const modal = document.getElementById('itemModal');
+            const editModal = document.getElementById('editItemModal');
+            const addItemBtn = document.getElementById('addItemBtn');
+            const closeBtn = document.querySelector('.close');
+            const editCloseBtn = document.querySelector('#editItemModal .close');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const editCancelBtn = document.getElementById('editCancelBtn');
+            const form = document.getElementById('addItemForm');
+            const editForm = document.getElementById('editItemForm');
+            
+            // Open modal
+            addItemBtn.addEventListener('click', function() {
+                modal.style.display = 'block';
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+            });
+            
+            // Close modal functions
+            function closeModal() {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+                form.reset();
+            }
+            
+            function closeEditModal() {
+                editModal.classList.remove('show');
+                setTimeout(() => {
+                    editModal.style.display = 'none';
+                }, 300);
+                editForm.reset();
+            }
+            
+            closeBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            editCloseBtn.addEventListener('click', closeEditModal);
+            editCancelBtn.addEventListener('click', closeEditModal);
+            
+            // Close modal if clicked outside
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+                if (event.target === editModal) {
+                    closeEditModal();
+                }
+            });
+            
+            // Edit item functionality
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const itemCard = this.closest('.item-card');
+                    const itemId = itemCard.dataset.id;
+                    const itemName = itemCard.dataset.name;
+                    
+                    document.getElementById('editItemId').value = itemId;
+                    document.getElementById('editItemName').value = itemName;
+                    
+                    editModal.style.display = 'block';
+                    setTimeout(() => {
+                        editModal.classList.add('show');
+                    }, 10);
+                });
+            });
+            
+            // Delete item functionality with SweetAlert2
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const itemId = this.closest('.item-card').dataset.id;
+                    const itemName = this.closest('.item-card').dataset.name;
+                    
+                    // Use SweetAlert2 for password confirmation
+                    Swal.fire({
+                        title: 'Confirm Delete',
+                        html: `
+                            <p>Are you sure you want to delete <strong>${itemName}</strong>?</p>
+                            <p>Please enter your password to confirm:</p>
+                        `,
+                        input: 'password',
+                        inputPlaceholder: 'Enter your password',
+                        inputAttributes: {
+                            autocapitalize: 'off',
+                            autocorrect: 'off'
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'Delete',
+                        confirmButtonColor: '#d33',
+                        cancelButtonText: 'Cancel',
+                        showLoaderOnConfirm: true,
+                        preConfirm: (password) => {
+                            if (!password) {
+                                Swal.showValidationMessage('Password is required');
+                                return false;
+                            }
+                            
+                            return fetch('/ajax/delete-item/', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                },
+                                body: JSON.stringify({ 
+                                    id: itemId,
+                                    password: password 
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (!data.success) {
+                                    throw new Error(data.error || 'Failed to delete item');
+                                }
+                                return data;
+                            })
+                            .catch(error => {
+                                Swal.showValidationMessage(`${error}`);
+                                return false;
+                            });
+                        },
+                        allowOutsideClick: () => !Swal.isLoading()
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: `${itemName} has been deleted.`,
+                                icon: 'success',
+                                confirmButtonColor: '#4a6cf7',
+                                timer: 1000,  // Auto close after 1 second
+                                showConfirmButton: false
+                            });
+                            
+                            // Set timeout to refresh page after confirmation is shown
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+                        }
+                    });
+                });
+            });
+            
+            // Handle form submission via AJAX with SweetAlert2
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('itemName').value
+                };
+                
+                // Send AJAX request
+                fetch('/ajax/create-item/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Close modal
+                        closeModal();
+                        
+                        // Show success toast and refresh after 1 second
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Item added successfully'
+                        });
+                        
+                        // Set timeout to refresh page after toast is shown
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.error || 'Failed to add item',
+                            confirmButtonColor: '#4a6cf7'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while adding the item',
+                        confirmButtonColor: '#4a6cf7'
+                    });
+                });
+            });
+            
+            // Handle edit form submission with SweetAlert2
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    id: document.getElementById('editItemId').value,
+                    name: document.getElementById('editItemName').value
+                };
+                
+                // Send AJAX request
+                fetch('/ajax/edit-item/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Close modal
+                        closeEditModal();
+                        
+                        // Show success toast and refresh after 1 second
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Item updated successfully'
+                        });
+                        
+                        // Set timeout to refresh page after toast is shown
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.error || 'Failed to update item',
+                            confirmButtonColor: '#4a6cf7'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating the item',
+                        confirmButtonColor: '#4a6cf7'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
