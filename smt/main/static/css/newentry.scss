@@ -1,0 +1,286 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    margin: 0%;
+    padding: 0%;
+    box-sizing: border-box;
+    // background-color: rgba(255, 0, 0, 0.1) !important;
+    // outline: 1px solid red;
+}
+
+body {
+    font-family: "poppins";
+    background-color: hsl(0, 0%, 90%);
+}
+
+nav {
+    display: flex;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    box-sizing: border-box;
+    margin-bottom: 2rem;
+    flex-direction: column;
+    gap: .5rem;
+    background-color: white;
+
+    a {
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        color: #000000;
+        font-weight: 300;
+
+        svg {
+            fill: #000000;
+        }
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+}
+
+.main-wrapper-container {
+    display: flex;
+    justify-content: center;
+
+    .main-wrapper {
+        width: min(100% - 2rem, 70rem);
+    }
+}
+
+.inp-section {
+    background-color: white;
+    padding: 1rem;
+    border-radius: .5rem;
+    margin-bottom: 1rem;
+
+    .s-head {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+
+        svg {
+            height: 1.8rem;
+            width: 1.8rem;
+            fill: black;
+        }
+
+        .txt {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+    }
+
+    .s-body {
+        margin-top: 1rem;
+
+        .inline-inp{
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+            .inp-sec{
+                margin-top: 0 !important;
+                flex: 2;
+
+                &:last-child{
+                    flex:1;
+                    button{
+                        height: 100%;
+                        background-color: greenyellow;
+                        border: 1px solid black;
+                        border-radius: .5rem;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        padding: .5rem;
+                    }
+                }
+            }
+        }
+
+        .inp-sec {
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+
+            &:not(:first-child) {
+                margin-top: 1rem;
+            }
+
+            label {
+                font-size: 1.1rem;
+                font-weight: 500;
+                text-transform: capitalize;
+            }
+
+            label.req::after {
+                content: "*";
+                color: red;
+            }
+
+            input {
+                padding: .5rem .6rem;
+                border: 1px solid;
+                border-color: hsl(0, 0%, 80%);
+                border-radius: .4rem;
+                font-size: 1rem;
+                font-weight: 500;
+
+                &:focus {
+                    outline: none;
+                    border-color: #000000;
+                }
+            }
+        }
+    }
+}
+
+#item-table {
+    width: 100%;
+    margin-top: 1rem;
+    border-collapse: collapse;
+    border-radius: .3rem;
+    overflow: hidden;
+
+    thead {
+        background-color: hsl(171, 100%, 70%);
+
+        th {
+            font-size: 1.1rem;
+            padding: .5rem 0;
+        }
+    }
+
+    tbody:has(.item-row){
+        #empty-row{
+            display: none;
+        }
+    }
+
+    tbody {
+
+        #empty-row{
+            td{
+                div{
+                    padding: .5rem 0;
+                    text-align: center;
+                    color: red;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: .5rem;
+                    svg{
+                        fill: red;
+                    }
+                }
+            }
+        }
+
+        tr {
+            background-color: hsl(171, 100%, 95%);
+        }
+
+        tr:nth-child(even) {
+            background-color: hsl(171, 100%, 90%);
+        }
+
+        td,
+        th{
+            &:not(:first-child){
+                border-left: 1px solid hsl(171, 100%, 70%);
+            }
+        }
+
+        td {
+            font-size: 1.1rem;
+            padding: .5rem;
+
+            &:not(:first-child) {
+                text-align: end;
+            }
+
+            &:nth-child(2) {
+                &::before {
+                    content: "₹ ";
+                    font-weight: 500;
+                }
+            }
+
+            button {
+                padding: .5rem .6rem;
+                background-color: hsl(0, 100%, 90%);
+                color: red;
+                font-weight: 800;
+                border: none;
+                border-radius: .5rem;
+                cursor: pointer;
+            }
+        }
+
+        th {
+            padding: .5rem;
+            text-align: end;
+            font-size: 1.2rem;
+
+            &::before {
+                content: "₹ ";
+                font-weight: 500;
+            }
+        }
+    }
+
+    tfoot {
+        background-color: aquamarine;
+        td {
+            padding: .5rem;
+            text-align: end;
+            font-size: 1.5rem;
+            font-weight: 600;            
+        }
+        th {
+            text-align: end;
+            font-size: 1.5rem;
+            font-weight: 600;
+            &::before {
+                content: "₹ ";
+                font-weight: 500;
+            }
+        }
+    }
+}
+
+.sub-sec{
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    // justify-content: end;
+
+    a,button{
+        padding: .5rem 1rem;
+        font-size: 1.1rem;
+        text-decoration: none;
+        font-weight: 500;
+        color: black;
+    }
+    button{
+        background-color: hsl(184, 100%, 50%);
+        border: 1px solid black;
+        border-radius: .5rem;
+    }
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+    100% { transform: translateX(0); }
+}
+
+.shake {
+    animation: shake 0.3s ease-in .5s 2;
+}

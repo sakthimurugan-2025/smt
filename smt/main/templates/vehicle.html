@@ -1,0 +1,802 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicles</title>
+    <link rel="stylesheet" href="{% static 'css/vehicle.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+            Back to home
+        </a>
+        <h2>New Entry</h2>
+    </nav>
+    <button id="themeToggle" aria-label="Toggle dark/light theme" 
+            style="position: absolute; top: 1rem; right: 1rem; padding: 0.5rem; 
+                   background: var(--primary-color); border: none; border-radius: 50%; 
+                   cursor: pointer; width: 40px; height: 40px; display: flex; 
+                   align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
+            <path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm0-18c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8z"/>
+            <path d="M12 17v-10v10z" fill="currentColor"/>
+        </svg>
+    </button>
+    <div class="vehicle-grid">
+        {% for vehicle in vehicles %}
+            <div class="vehicle-card">
+                <div class="avatar">{{ vehicle.name|slice:":1" }}</div>
+                <div class="vehicle-info">
+                    <p>{{ vehicle.name }}</p>
+                    {% if vehicle.number %}
+                    <p>{{ vehicle.number }}</p>
+                    {% else %}
+                    <p>-</p>
+                    {% endif %}
+                    <!-- Edit and Delete Buttons -->
+                    <div class="vehicle-actions">
+                        <button class="edit-btn" data-id="{{ vehicle.id }}" aria-label="Edit">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 0 24 24" width="16px" fill="#ffffff">
+                                <path d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                        </button>
+                        <button class="delete-btn" data-id="{{ vehicle.id }}" aria-label="Delete">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 0 24 24" width="16px" fill="#ffffff">
+                                <path d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        
+        <!-- Add New Vehicle Card -->
+        <div class="vehicle-card add-vehicle-card" id="addVehicleBtn">
+            <div class="avatar add-icon">+</div>
+            <div class="vehicle-info">
+                <p>Add New Vehicle</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Vehicle Modal -->
+    <div id="addVehicleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Vehicle</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="errorContainer" class="error-container"></div>
+                <form id="addVehicleForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="vehicleName">Vehicle Name*</label>
+                        <input type="text" id="vehicleName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicleNumber">Vehicle Number</label>
+                        <input type="text" id="vehicleNumber" name="number">
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicleCompany">Company</label>
+                        <select id="vehicleCompany" name="company">
+                            <option value="">Select Company (Optional)</option>
+                            {% for company in companies %}
+                                <option value="{{ company.id }}">{{ company.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="cancelBtn" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="submit-btn">Add Vehicle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Edit Vehicle Modal -->
+    <div id="editVehicleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Vehicle</h2>
+                <span class="close-modal" data-modal="editVehicleModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="editErrorContainer" class="error-container"></div>
+                <form id="editVehicleForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="editVehicleId" name="id">
+                    <div class="form-group">
+                        <label for="editVehicleName">Vehicle Name*</label>
+                        <input type="text" id="editVehicleName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editVehicleNumber">Vehicle Number</label>
+                        <input type="text" id="editVehicleNumber" name="number">
+                    </div>
+                    <div class="form-group">
+                        <label for="editVehicleCompany">Company</label>
+                        <select id="editVehicleCompany" name="company">
+                            <option value="">Select Company (Optional)</option>
+                            {% for company in companies %}
+                                <option value="{{ company.id }}">{{ company.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" data-modal="editVehicleModal">Cancel</button>
+                        <button type="submit" class="submit-btn">Update Vehicle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Vehicle Confirmation Modal -->
+    <div id="deleteVehicleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirm Delete</h2>
+                <span class="close-modal" data-modal="deleteVehicleModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the vehicle "<span id="deleteVehicleName"></span>"?</p>
+                <div id="deleteErrorContainer" class="error-container"></div>
+                <form id="deleteVehicleForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="deleteVehicleId" name="id">
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" data-modal="deleteVehicleModal">Cancel</button>
+                        <button type="submit" class="delete-confirm-btn">Delete Vehicle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('light-theme');
+            // Save preference to localStorage
+            if (document.body.classList.contains('light-theme')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        
+        // Check for saved theme preference
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+            }
+        });
+
+        // Modified modal functionality for animations
+        const modal = document.getElementById('addVehicleModal');
+        const addBtn = document.getElementById('addVehicleBtn');
+        const closeBtn = document.querySelector('.close-modal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const form = document.getElementById('addVehicleForm');
+        const errorContainer = document.getElementById('errorContainer');
+
+        // Open modal with animation
+        addBtn.addEventListener('click', function() {
+            modal.style.display = 'block';
+            // Trigger reflow
+            modal.offsetWidth;
+            // Add show class for animation
+            modal.classList.add('show');
+            errorContainer.innerHTML = '';
+            form.reset();
+        });
+
+        // Close modal with animation
+        function closeModal() {
+            modal.classList.remove('show');
+            // Wait for animation to complete before hiding
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Form submission with AJAX
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            errorContainer.innerHTML = '';
+            
+            // Get form data
+            const formData = new FormData(form);
+            const data = {
+                name: formData.get('name').trim(),
+                number: formData.get('number').trim(),
+                company_id: formData.get('company') || null
+            };
+            
+            // Validation
+            if (!data.name) {
+                displayError('Vehicle name is required');
+                return;
+            }
+            
+            // Disable submit button to prevent double submission
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Adding...';
+            
+            // Send AJAX request
+            fetch('{% url "ajax_create_vehicle" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success - refresh the page to show new vehicle
+                    window.location.reload();
+                } else {
+                    // Error handling
+                    displayError(data.error || 'An error occurred while adding the vehicle');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Add Vehicle';
+                }
+            })
+            .catch(error => {
+                displayError('Network error. Please try again.');
+                console.error('Error:', error);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Vehicle';
+            });
+        });
+
+        // Error display function
+        function displayError(message) {
+            errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+            errorContainer.style.display = 'block';
+        }
+
+        // JavaScript for handling edit and delete actions
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const vehicleId = this.getAttribute('data-id');
+                // Implement edit functionality here
+                console.log('Edit vehicle with ID:', vehicleId);
+            });
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const vehicleId = this.getAttribute('data-id');
+                // Implement delete functionality here
+                console.log('Delete vehicle with ID:', vehicleId);
+            });
+        });
+
+        // Setup variables for edit and delete modals
+        const editModal = document.getElementById('editVehicleModal');
+        const deleteModal = document.getElementById('deleteVehicleModal');
+        const editForm = document.getElementById('editVehicleForm');
+        const deleteForm = document.getElementById('deleteVehicleForm');
+        const editErrorContainer = document.getElementById('editErrorContainer');
+        const deleteErrorContainer = document.getElementById('deleteErrorContainer');
+
+        // Generic modal close function
+        function closeModalById(modalId) {
+            const modalElement = document.getElementById(modalId);
+            modalElement.classList.remove('show');
+            setTimeout(() => {
+                modalElement.style.display = 'none';
+            }, 300);
+        }
+
+        // Add event listener to all elements with close-modal class
+        document.querySelectorAll('.close-modal, .cancel-btn').forEach(element => {
+            if (element.hasAttribute('data-modal')) {
+                element.addEventListener('click', function() {
+                    closeModalById(this.getAttribute('data-modal'));
+                });
+            }
+        });
+
+        // JavaScript for handling edit button clicks
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                const vehicleId = this.getAttribute('data-id');
+                const vehicleCard = this.closest('.vehicle-card');
+                const vehicleName = vehicleCard.querySelector('.vehicle-info p:first-child').textContent.trim();
+                let vehicleNumber = vehicleCard.querySelector('.vehicle-info p:nth-child(2)').textContent.trim();
+                
+                if (vehicleNumber === '-') {
+                    vehicleNumber = '';
+                }
+                
+                // Populate the edit form
+                document.getElementById('editVehicleId').value = vehicleId;
+                document.getElementById('editVehicleName').value = vehicleName;
+                document.getElementById('editVehicleNumber').value = vehicleNumber;
+                
+                // Reset error container
+                editErrorContainer.innerHTML = '';
+                
+                // Show the modal
+                editModal.style.display = 'block';
+                editModal.offsetWidth; // Trigger reflow
+                editModal.classList.add('show');
+            });
+        });
+
+        // JavaScript for handling delete button clicks
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                const vehicleId = this.getAttribute('data-id');
+                const vehicleName = this.closest('.vehicle-card').querySelector('.vehicle-info p:first-child').textContent.trim();
+                
+                // Populate the delete form
+                document.getElementById('deleteVehicleId').value = vehicleId;
+                document.getElementById('deleteVehicleName').textContent = vehicleName;
+                
+                // Reset error container
+                deleteErrorContainer.innerHTML = '';
+                
+                // Show the modal
+                deleteModal.style.display = 'block';
+                deleteModal.offsetWidth; // Trigger reflow
+                deleteModal.classList.add('show');
+            });
+        });
+
+        // Edit form submission handler
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            editErrorContainer.innerHTML = '';
+            
+            // Get form data
+            const formData = new FormData(editForm);
+            const data = {
+                id: formData.get('id'),
+                name: formData.get('name').trim(),
+                number: formData.get('number').trim(),
+                company_id: formData.get('company') || null
+            };
+            
+            // Validation
+            if (!data.name) {
+                displayErrorInContainer(editErrorContainer, 'Vehicle name is required');
+                return;
+            }
+            
+            // Disable submit button to prevent double submission
+            const submitBtn = editForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating...';
+            
+            // Send AJAX request
+            fetch('{% url "ajax_edit_vehicle" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success - refresh the page to show updated vehicle
+                    window.location.reload();
+                } else {
+                    // Error handling
+                    displayErrorInContainer(editErrorContainer, data.error || 'An error occurred while updating the vehicle');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Update Vehicle';
+                }
+            })
+            .catch(error => {
+                displayErrorInContainer(editErrorContainer, 'Network error. Please try again.');
+                console.error('Error:', error);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Update Vehicle';
+            });
+        });
+
+        // Delete form submission handler
+        deleteForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            deleteErrorContainer.innerHTML = '';
+            
+            // Get form data
+            const formData = new FormData(deleteForm);
+            const data = {
+                id: formData.get('id')
+            };
+            
+            // Disable submit button to prevent double submission
+            const submitBtn = deleteForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Deleting...';
+            
+            // Send AJAX request
+            fetch('{% url "ajax_delete_vehicle" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success - refresh the page to update the vehicle list
+                    window.location.reload();
+                } else {
+                    // Error handling
+                    displayErrorInContainer(deleteErrorContainer, data.error || 'An error occurred while deleting the vehicle');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Delete Vehicle';
+                }
+            })
+            .catch(error => {
+                displayErrorInContainer(deleteErrorContainer, 'Network error. Please try again.');
+                console.error('Error:', error);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Delete Vehicle';
+            });
+        });
+
+        // Function for displaying errors in any container
+        function displayErrorInContainer(container, message) {
+            container.innerHTML = `<div class="error-message">${message}</div>`;
+            container.style.display = 'block';
+        }
+
+        // Use existing displayError for the add form
+        function displayError(message) {
+            displayErrorInContainer(errorContainer, message);
+        }
+    </script>
+
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            overflow: auto;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal.show {
+            opacity: 1;
+        }
+        
+        .modal-content {
+            background-color: #242424;
+            margin: 5% auto;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .light-theme .modal-content {
+            background-color: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            background-color: #2c2c2c;
+        }
+        
+        .light-theme .modal-header {
+            border-bottom: 1px solid #eaeaea;
+            background-color: #f8f9fa;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        .light-theme .modal-header h2 {
+            color: #333;
+        }
+        
+        .close-modal {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+            transition: color 0.2s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-modal:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .light-theme .close-modal {
+            color: #777;
+        }
+        
+        .light-theme .close-modal:hover {
+            color: #333;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+        }
+        
+        .light-theme .form-group label {
+            color: #555;
+        }
+        
+        /* Updated form input styles to fix overflow */
+        .form-group input, 
+        .form-group select {
+            box-sizing: border-box; /* This is the key fix */
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background-color: #1a1a1a;
+            color: #fff;
+            font-family: "Poppins", sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            max-width: 100%; /* Ensure it doesn't exceed container */
+        }
+        
+        .form-group input:focus, 
+        .form-group select:focus {
+            outline: none;
+            border-color: #4a6cf7;
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+        }
+        
+        .light-theme .form-group input, 
+        .light-theme .form-group select {
+            border: 1px solid #ddd;
+            background-color: #ffffff;
+            color: #333;
+        }
+        
+        .light-theme .form-group input:focus, 
+        .light-theme .form-group select:focus {
+            border-color: #4a6cf7;
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+        }
+        
+        /* Fix for select dropdown appearance */
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23777' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px; /* Space for the dropdown arrow */
+        }
+        
+        .light-theme .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        button.cancel-btn,
+        button.submit-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: "Poppins", sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+        
+        button.cancel-btn {
+            background-color: transparent;
+            border: 1px solid #555;
+            color: #ccc;
+        }
+        
+        button.cancel-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: #777;
+        }
+        
+        .light-theme button.cancel-btn {
+            border: 1px solid #ccc;
+            color: #666;
+        }
+        
+        .light-theme button.cancel-btn:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+            border-color: #aaa;
+            color: #444;
+        }
+        
+        button.submit-btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        button.submit-btn:hover {
+            background-color: #3e9c41;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .error-container {
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message {
+            padding: 12px 15px;
+            background-color: rgba(255, 69, 58, 0.1);
+            border-left: 4px solid #ff453a;
+            border-radius: 6px;
+            color: #ff6b6b;
+            font-size: 0.95rem;
+            animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+        
+        .light-theme .error-message {
+            background-color: #fff0f0;
+            border-left-color: #ff453a;
+            color: #e73c3c;
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translateX(-1px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-3px); }
+            40%, 60% { transform: translateX(3px); }
+        }
+        
+        /* Ensure all elements use border-box sizing to prevent overflow */
+        * {
+            box-sizing: border-box;
+        }
+
+        .vehicle-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;  /* Reduced gap */
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 5px;  /* Reduced padding */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;  /* Reduced font size */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;  /* Set fixed width */
+            height: 30px;  /* Set fixed height */
+        }
+
+        .edit-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #45a049;
+        }
+
+        .delete-btn:hover {
+            background-color: #e53935;
+        }
+
+        .delete-confirm-btn {
+            background-color: #f44336;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: "Poppins", sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .delete-confirm-btn:hover {
+            background-color: #e53935;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</body>
+</html>

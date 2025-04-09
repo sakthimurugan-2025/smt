@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parties</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/parties.css' %}">
+</head>
+
+<body>
+    <nav>
+        <a href="{% url 'home' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+            Back to home
+        </a>
+        <h2>New Entry</h2>
+    </nav>
+
+    <div class="container">
+        <div class="header-actions">
+            <h3>All Parties</h3>
+            <div class="action-buttons">
+                <div class="search-container">
+                    <input type="text" id="searchParty" placeholder="Search parties...">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                </div>
+                <button id="addPartyBtn" class="btn-primary">Add New Party</button>
+            </div>
+        </div>
+
+        <div class="parties-grid">
+            {% if parties %}
+                {% for party in parties %}
+                <div class="party-card" data-party-id="{{ party.id }}" data-party-name="{{ party.name }}" 
+                     data-party-location="{{ party.location|default:'Not specified' }}" 
+                     data-party-phone="{{ party.phone|default:'Not specified' }}" 
+                     data-party-gst="{{ party.gst|default:'Not specified' }}">
+                    <h4>{{ party.name }}</h4>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-parties">No parties found. Add a new party to get started.</p>
+            {% endif %}
+        </div>
+        <div id="no-search-results" class="no-search-results" style="display: none;">
+            <p>No parties match your search.</p>
+        </div>
+    </div>
+
+    <!-- Add Party Modal -->
+    <div id="addPartyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Party</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="addPartyForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="text" id="phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="gst">GST</label>
+                    <input type="text" id="gst" name="gst">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+                    <button type="submit" class="btn-primary" id="addPartySubmit">
+                        <div class="loading-container">
+                            <span class="spinner" id="addSpinner"></span>
+                            <span>Add Party</span>
+                        </div>
+                    </button>
+                </div>
+                <p class="success-message" id="add-success-message" style="display: none;">Party added successfully!</p>
+                <p class="error-message" id="add-error-message" style="display: none;"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Party Details Modal -->
+    <div id="viewPartyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="viewPartyTitle">Party Details</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="party-details-container">
+                    <div class="detail-row">
+                        <span class="detail-label">Location:</span>
+                        <span id="viewPartyLocation" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone:</span>
+                        <span id="viewPartyPhone" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">GST:</span>
+                        <span id="viewPartyGST" class="detail-value"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-icon view-btn" id="viewPartyDetails" aria-label="View full party details">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" width="18">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    </svg>
+                    <span>View Details</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal handling
+        const addModal = document.getElementById("addPartyModal");
+        const viewModal = document.getElementById("viewPartyModal");
+        const addBtn = document.getElementById("addPartyBtn");
+        const closeBtns = document.querySelectorAll(".close, .cancel-btn");
+
+        // Open add modal
+        addBtn.onclick = function() {
+            addModal.style.display = "block";
+            document.getElementById("addPartyForm").reset();
+        }
+
+        // Close modals
+        closeBtns.forEach(btn => {
+            btn.onclick = function() {
+                addModal.style.display = "none";
+                viewModal.style.display = "none";
+            }
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target == addModal) {
+                addModal.style.display = "none";
+            }
+            if (event.target == viewModal) {
+                viewModal.style.display = "none";
+            }
+        }
+
+        // Make cards clickable to show details modal
+        document.querySelectorAll('.party-card').forEach(card => {
+            card.addEventListener('click', function() {
+                showPartyDetails(this);
+            });
+        });
+
+        // Function to show party details in modal
+        function showPartyDetails(card) {
+            const partyId = card.getAttribute('data-party-id');
+            const partyName = card.getAttribute('data-party-name');
+            const partyLocation = card.getAttribute('data-party-location');
+            const partyPhone = card.getAttribute('data-party-phone');
+            const partyGST = card.getAttribute('data-party-gst');
+            
+            // Set values in the view modal
+            document.getElementById('viewPartyTitle').textContent = partyName;
+            document.getElementById('viewPartyLocation').textContent = partyLocation;
+            document.getElementById('viewPartyPhone').textContent = partyPhone;
+            document.getElementById('viewPartyGST').textContent = partyGST;
+            
+            // Set the details button link with the party ID
+            const detailsBtn = document.getElementById('viewPartyDetails');
+            detailsBtn.onclick = function() {
+                window.location.href = '/parties/' + partyId + '/';
+            };
+            
+            // Show the modal
+            viewModal.style.display = "block";
+        }
+
+        // Search functionality
+        document.getElementById('searchParty').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const partyCards = document.querySelectorAll('.party-card');
+            let matchFound = false;
+            
+            partyCards.forEach(card => {
+                const partyName = card.getAttribute('data-party-name').toLowerCase();
+                
+                if (partyName.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    matchFound = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Show or hide the no results message
+            const noResultsElement = document.getElementById('no-search-results');
+            const noPartiesElement = document.querySelector('.no-parties');
+            
+            if (!matchFound && partyCards.length > 0) {
+                noResultsElement.style.display = 'block';
+                if (noPartiesElement) noPartiesElement.style.display = 'none';
+            } else {
+                noResultsElement.style.display = 'none';
+                if (noPartiesElement) noPartiesElement.style.display = partyCards.length === 0 ? 'block' : 'none';
+            }
+        });
+
+        // Form submissions
+        document.getElementById("addPartyForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            // Prevent double submission
+            const submitButton = document.getElementById("addPartySubmit");
+            const spinner = document.getElementById("addSpinner");
+            const loadingText = submitButton.querySelector("span:last-child");
+            const originalText = loadingText.textContent;
+            
+            if (submitButton.disabled) {
+                return;
+            }
+            
+            // Disable button and show spinner
+            submitButton.disabled = true;
+            submitButton.classList.add("btn-loading");
+            spinner.style.display = "inline-block";
+            loadingText.textContent = "Adding...";
+            document.getElementById("addPartyForm").classList.add("form-loading");
+            
+            const name = document.getElementById("name").value;
+            const location = document.getElementById("location").value;
+            const phone = document.getElementById("phone").value;
+            const gst = document.getElementById("gst").value;
+            
+            fetch('/ajax/create-party/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    location: location,
+                    phone: phone,
+                    gst: gst
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const successMsg = document.getElementById("add-success-message");
+                    successMsg.style.display = "block";
+                    successMsg.classList.add("show");
+                    document.getElementById("add-error-message").style.display = "none";
+                    
+                    // Keep loading state for success feedback
+                    submitButton.textContent = "Added Successfully!";
+                    
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    const errorMsg = document.getElementById("add-error-message");
+                    errorMsg.textContent = 'Error: ' + data.error;
+                    errorMsg.style.display = "block";
+                    errorMsg.classList.add("show");
+                    document.getElementById("add-success-message").style.display = "none";
+                    
+                    // Reset button state
+                    submitButton.disabled = false;
+                    submitButton.classList.remove("btn-loading");
+                    spinner.style.display = "none";
+                    loadingText.textContent = originalText;
+                    document.getElementById("addPartyForm").classList.remove("form-loading");
+                }
+            })
+            .catch(error => {
+                const errorMsg = document.getElementById("add-error-message");
+                errorMsg.textContent = 'Error: ' + error;
+                errorMsg.style.display = "block";
+                errorMsg.classList.add("show");
+                document.getElementById("add-success-message").style.display = "none";
+                
+                // Reset button state
+                submitButton.disabled = false;
+                submitButton.classList.remove("btn-loading");
+                spinner.style.display = "none";
+                loadingText.textContent = originalText;
+                document.getElementById("addPartyForm").classList.remove("form-loading");
+            });
+        });
+    </script>
+</body>
+
+</html>
