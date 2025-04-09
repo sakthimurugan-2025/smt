@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/invoice.css' %}">
+</head>
+
+<body>
+    <div class="invoice">
+
+        <div class="line">
+            <h2>Sakthi Murugan Auto</h2>
+            <h1>TRANSPORT INVOICE</h1>
+        </div>
+
+        <div class="info">
+            <div class="sec">
+                Thingalur,<br>
+                Erode - 638055 <br>
+                Phone: +91 9876 54321
+            </div>
+            <div class="sec">
+                <p>Date from: <b>{{ invoice.f_date }}</b></p>
+                <p>Date To: <b>{{ invoice.t_date }}</b></p>
+            </div>
+        </div>
+
+        <div class="bill-to">
+            <div class="head">Bill to:</div>
+            <div class="party-info">
+                <div class="party-name">{{ items.first.entry.party.name }}</div>
+                <div class="party-address">
+                    {{ items.first.entry.party.address }}
+                </div>
+                <div class="party-phone">
+                    Phone : {{ items.first.entry.party.phone }}
+                </div>
+                <div class="party-gst">
+                    GST : {{ items.first.entry.party.gst }}
+                </div>
+            </div>
+        </div>
+
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.entry.date }}</td>
+                    <td>{{ item.entry.customer_from }}</td>
+                    <td>{{ item.entry.customer_to }}</td>
+                    <td>
+                        <table class="sub-table">
+                            {% for entry_item in item.entry.entryitem_set.all %}
+                            <tr>
+                                <td>{{ entry_item.item.name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                    <td>
+                        <table class="sub-table right">
+                            {% for entry_item in item.entry.entryitem_set.all %}
+                            <tr>
+                                <td>{{ entry_item.quantity }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                    <td>
+                        <table class="sub-table right">
+                            {% for entry_item in item.entry.entryitem_set.all %}
+                            <tr>
+                                <th class="amount-value">{{ entry_item.total }}</th>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td style="text-align: end;" colspan="6"><b>Total</b></td>
+                    <th style="text-align: end;" class="total amount-value">{{ invoice.total }}</th>
+                </tr>
+            </tfoot>
+        </table>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Format all amount values with commas
+            const amountElements = document.querySelectorAll('.amount-value');
+            
+            amountElements.forEach(element => {
+                const value = parseFloat(element.textContent.trim());
+                if (!isNaN(value)) {
+                    // Format with commas for Indian number format and add rupee symbol
+                    element.textContent = '₹ ' + formatIndianNumber(value);
+                }
+            });
+            
+            // Function to format number in Indian format (commas after 3 digits from right, then every 2 digits)
+            function formatIndianNumber(num) {
+                const numStr = num.toString();
+                let afterDecimal = '';
+                let beforeDecimal = numStr;
+                
+                // Handle decimal point if exists
+                if (numStr.includes('.')) {
+                    const parts = numStr.split('.');
+                    beforeDecimal = parts[0];
+                    afterDecimal = '.' + parts[1];
+                }
+                
+                // Format the integer part with commas
+                let formattedNumber = '';
+                const length = beforeDecimal.length;
+                
+                for (let i = 0; i < length; i++) {
+                    if (i === 0) {
+                        formattedNumber = beforeDecimal.charAt(length - 1 - i);
+                    } else if (i === 3 || (i > 3 && (i - 3) % 2 === 0)) {
+                        formattedNumber = ',' + formattedNumber;
+                        formattedNumber = beforeDecimal.charAt(length - 1 - i) + formattedNumber;
+                    } else {
+                        formattedNumber = beforeDecimal.charAt(length - 1 - i) + formattedNumber;
+                    }
+                }
+                
+                return formattedNumber + afterDecimal;
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entry</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/entry.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <!-- Add Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+
+<body>
+
+    <nav>
+        <a href="{% url 'home' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+            Back to home
+        </a>
+        <h2>Entry</h2>
+    </nav>
+    <div class="main-wrapper-container">
+        <div class="main-wrapper">
+            <div class="table-extras-grid">
+                <div class="table-extra">
+                    <h3>Filter</h3>
+                    <div class="filters">
+                        <div class="filter">
+                            <label for="invoice-filter">Party</label>
+                            <select id="party-selection">
+                                <option value="all">All</option>
+                                {% for party in parties %}
+                                <option value="{{ party.id }}">
+                                    {{ party.name }}
+                                    {% if party.location %}
+                                        - {{ party.location }}
+                                    {% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter">
+                            <label for="vehicle-filter">Vehicle</label>
+                            <select multiple name="vehicle-filter" id="vehicle-filter">
+                                {% for vehicle in vehicles %}
+                                <option value="{{ vehicle.id }}">{{ vehicle.name }}
+                                    {% if vehicle.number %} - {{vehicle.number }}{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <button id="clear-vehicle-filter" class="clear-btn">Clear</button>
+                        </div>
+                        <div class="filter">
+                            <label for="driver-filter">Driver</label>
+                            <select multiple name="driver-filter" id="driver-filter">
+                                {% for driver in drivers %}
+                                <option value="{{ driver.id }}">{{ driver.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button id="clear-driver-filter" class="clear-btn">Clear</button>
+                        </div>
+                        <div class="filter">
+                            <label for="date-range">Date Range</label>
+                            <input type="text" id="date-range" placeholder="Select date range" class="date-input">
+                            <button id="clear-date-filter" class="clear-btn">Clear</button>
+                        </div>
+                        <div class="filter">
+                            <label>Status</label>
+                            <div class="status-toggle switch">
+                                <input type="radio" id="status-all" name="status" value="all" checked>
+                                <label for="status-all">All</label>
+                                <input type="radio" id="status-non-invoices" name="status" value="non-invoices">
+                                <label for="status-non-invoices">Non-Invoices</label>
+                                <input type="radio" id="status-invoiced" name="status" value="invoiced">
+                                <label for="status-invoiced">Invoiced</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="entries-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="party">Party <span class="sort-icon">↕</span></th>
+                            <th class="sortable" data-sort="date">Date <span class="sort-icon">↕</span></th>
+                            <th class="sortable" data-sort="from">From <span class="sort-icon">↕</span></th>
+                            <th class="sortable" data-sort="to">To <span class="sort-icon">↕</span></th>
+                            <th class="sortable" data-sort="status">Status <span class="sort-icon">↕</span></th>
+                            <th class="sortable" data-sort="driver">Driver <span class="sort-icon">↕</span></th>
+                            <th class="sortable" data-sort="total">Total <span class="sort-icon">↕</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        {% for entry in entries %}
+                        <tr
+                            data-id="{{entry.id}}"
+                            data-party="{{entry.party.id}}"
+                            data-date="{{entry.date|date:'Y-m-d'}}"
+                            data-invoices="{{entry.no_of_invoices}}"
+                            data-driver="{{entry.driver.id}}"
+                            data-total="{{entry.total}}"
+                            data-vehicle="{{entry.vehicle.id}}"
+                            onclick="location.href=`{% url 'entry_details' entry.id %}`"
+                            >
+                            <td>{{ entry.party.name }}</td>
+                            <td>{{ entry.date|date:"d-M-Y" }}</td>
+                            <td>{{ entry.customer_from }}</td>
+                            <td>{{ entry.customer_to }}</td>
+                            <td>
+                                {% if entry.no_of_invoices %}
+                                <div class="tag red">{{entry.no_of_invoices}}</div>
+                                {% else %}
+                                <div class="tag">No Invoice</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="vehicle-container">
+                                    <abbr title="{{ entry.driver.phone }}" class="driver">
+                                        {{ entry.driver.name }}
+                                    </abbr>
+                                    <abbr title="{{ entry.vehicle.number }}" class="vehicle">
+                                        {{ entry.vehicle.name }}
+                                    </abbr>
+                                </div>
+                            </td>
+                            <td class="amount">{{ entry.total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <!-- Add Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="{% static 'js/entry.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Existing code for filters
+            const vehicleSelect = document.getElementById('vehicle-filter');
+            var vehicleChoices = new Choices(vehicleSelect, {
+                removeItemButton: true,
+                placeholderValue: 'Select parties',
+                searchPlaceholderValue: 'Search parties'
+            });
+            document.getElementById('clear-vehicle-filter').addEventListener('click', function () {
+                vehicleChoices.removeActiveItems();
+                filterVehicle();
+            });
+
+            const driverSelect = document.getElementById('driver-filter');
+            var driverChoices = new Choices(driverSelect, {
+                removeItemButton: true,
+                placeholderValue: 'Select drivers',
+                searchPlaceholderValue: 'Search drivers'
+            });
+            document.getElementById('clear-driver-filter').addEventListener('click', function () {
+                driverChoices.removeActiveItems();
+            });
+
+            // Initialize Flatpickr date picker in range mode
+            const dateRangePicker = flatpickr("#date-range", {
+                mode: "range",
+                dateFormat: "d-m-Y",
+                allowInput: true,
+                placeholder: "Select date range",
+                onChange: filterDate // Add this line to call filterDate on change
+            });
+
+            // Clear date filter
+            document.getElementById('clear-date-filter').addEventListener('click', function () {
+                dateRangePicker.clear();
+                filterDate(); // Add this line to call filterDate after clearing
+            });
+
+            // Add event listener for status filter
+            document.querySelectorAll('input[name="status"]').forEach(radio => {
+                radio.addEventListener('change', filterStatus);
+            });
+
+            // Table sorting functionality
+            const table = document.getElementById('entries-table');
+            const headers = table.querySelectorAll('th.sortable');
+            let currentSort = { column: 'date', direction: 'desc' }; // Initialize with date column descending
+
+            // Add click event listeners to sortable headers
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const column = header.dataset.sort;
+                    const direction = (currentSort.column === column && currentSort.direction === 'asc') ? 'desc' : 'asc';
+                    
+                    // Update sort indicators
+                    headers.forEach(h => {
+                        const icon = h.querySelector('.sort-icon');
+                        if (h.dataset.sort === column) {
+                            // Inverted arrow logic: ↓ for ascending (smallest to largest), ↑ for descending (largest to smallest)
+                            icon.textContent = direction === 'asc' ? '↓' : '↑';
+                            h.classList.add('sorted');
+                        } else {
+                            icon.textContent = '↕';
+                            h.classList.remove('sorted');
+                        }
+                    });
+                    
+                    // Sort table
+                    sortTable(column, direction);
+                    
+                    // Update current sort
+                    currentSort = { column, direction };
+                });
+            });
+            
+            function sortTable(column, direction) {
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const columnIndex = Array.from(table.querySelectorAll('th')).findIndex(th => th.dataset.sort === column);
+                
+                if (columnIndex === -1) return; // Column not found
+                
+                // Sort rows
+                const sortedRows = rows.sort((a, b) => {
+                    const cellA = a.cells[columnIndex].textContent.trim();
+                    const cellB = b.cells[columnIndex].textContent.trim();
+                    
+                    // Determine data type for appropriate sorting
+                    if (column === 'date') {
+                        // Improved date parsing
+                        const dateA = parseDate(cellA);
+                        const dateB = parseDate(cellB);
+                        return direction === 'asc' ? dateA - dateB : dateB - dateA;
+                    } else if (column === 'total') {
+                        // Parse numbers
+                        const numA = parseFloat(cellA.replace(/[^\d.-]/g, '')) || 0;
+                        const numB = parseFloat(cellB.replace(/[^\d.-]/g, '')) || 0;
+                        return direction === 'asc' ? numA - numB : numB - numA;
+                    } else {
+                        // Text comparison
+                        return direction === 'asc' 
+                            ? cellA.localeCompare(cellB)
+                            : cellB.localeCompare(cellA);
+                    }
+                });
+                
+                // Remove rows
+                while (tbody.firstChild) {
+                    tbody.removeChild(tbody.firstChild);
+                }
+                
+                // Add sorted rows
+                sortedRows.forEach(row => tbody.appendChild(row));
+            }
+            
+            function parseDate(dateStr) {
+                // Enhanced date parsing to handle multiple formats
+                try {
+                    // Django template may output dates in different formats
+                    // Try various formats
+                    
+                    // If it's already a valid date object
+                    if (dateStr instanceof Date) {
+                        return dateStr.getTime();
+                    }
+                    
+                    dateStr = dateStr.trim();
+                    
+                    // Try direct parsing (works for YYYY-MM-DD and some other formats)
+                    let date = new Date(dateStr);
+                    if (!isNaN(date.getTime())) {
+                        return date.getTime();
+                    }
+                    
+                    // Try DD-MM-YYYY format (common Django format)
+                    const parts = dateStr.split(/[-/.]/); // Split by dash, dot or slash
+                    
+                    if (parts.length === 3) {
+                        // Assume day, month, year order - adjust as needed
+                        const day = parseInt(parts[0], 10);
+                        const month = parseInt(parts[1], 10) - 1; // JavaScript months are 0-indexed
+                        const year = parseInt(parts[2], 10);
+                        
+                        date = new Date(year, month, day);
+                        if (!isNaN(date.getTime())) {
+                            return date.getTime();
+                        }
+                        
+                        // Try alternative order: year, month, day
+                        date = new Date(parts[0], parts[1] - 1, parts[2]);
+                        if (!isNaN(date.getTime())) {
+                            return date.getTime();
+                        }
+                    }
+                    
+                    console.log("Failed to parse date:", dateStr);
+                    
+                    // Fallback for unparseable dates
+                    return 0;
+                } catch (e) {
+                    console.error("Error parsing date:", e);
+                    return 0;
+                }
+            }
+
+            // Apply default sorting (date column, newest to oldest) immediately
+            window.setTimeout(() => {
+                const dateHeader = Array.from(headers).find(header => header.dataset.sort === 'date');
+                if (dateHeader) {
+                    // Update sort indicator
+                    const icon = dateHeader.querySelector('.sort-icon');
+                    icon.textContent = '↑';  // Using inverted arrow for descending
+                    dateHeader.classList.add('sorted');
+                    
+                    // Sort table by date descending
+                    sortTable('date', 'desc');
+                }
+            }, 0);
+
+            // Add .00 to all non-decimal .amount values and format to Indian comma style
+            const amounts = document.querySelectorAll('.amount');
+            amounts.forEach(amount => {
+                let value = amount.textContent.trim();
+                if (!value.includes('.')) {
+                    value += '.00';
+                } else if (value.split('.')[1].length === 1) {
+                    value += '0';
+                }
+                amount.textContent = formatToIndianComma(value);
+            });
+
+            function formatToIndianComma(value) {
+                const parts = value.split('.');
+                let integerPart = parts[0];
+                const decimalPart = parts.length > 1 ? '.' + parts[1] : '';
+
+                // Format integer part to Indian comma style
+                const lastThree = integerPart.slice(-3);
+                const otherNumbers = integerPart.slice(0, -3);
+                if (otherNumbers !== '') {
+                    integerPart = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + ',' + lastThree;
+                }
+
+                return integerPart + decimalPart;
+            }
+
+            // Add event listener for select-all checkbox
+            document.getElementById('select-all').addEventListener('change', function () {
+                const isChecked = this.checked;
+                document.querySelectorAll('#table-body input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,313 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drivers</title>
+    <link rel="stylesheet" href="{% static 'css/driver.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+            Back to home
+        </a>
+        <h2>New Entry</h2>
+    </nav>
+    <button id="themeToggle" aria-label="Toggle dark/light theme" 
+            style="position: absolute; top: 1rem; right: 1rem; padding: 0.5rem; 
+                   background: var(--primary-color); border: none; border-radius: 50%; 
+                   cursor: pointer; width: 40px; height: 40px; display: flex; 
+                   align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
+            <path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm0-18c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8z"/>
+            <path d="M12 17v-10v10z" fill="currentColor"/>
+        </svg>
+    </button>
+    <div class="driver-grid">
+        {% for driver in drivers %}
+            <div class="driver-card" data-id="{{ driver.id }}" data-name="{{ driver.name }}" data-phone="{{ driver.phone|default:'' }}">
+                <div class="avatar">{{ driver.name|slice:":1" }}</div>
+                <div class="driver-info">
+                    <p>{{ driver.name }}</p>
+                    {% if driver.phone %}
+                    <p>{{ driver.phone }}</p>
+                    {% else %}
+                    <p>-</p>
+                    {% endif %}
+                </div>
+                <div class="driver-actions">
+                    <button class="edit-btn" title="Edit driver">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" width="18">
+                            <path d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                    </button>
+                    <button class="delete-btn" title="Delete driver">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" width="18">
+                            <path d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+        
+        <!-- Add New Driver Card -->
+        <div class="driver-card add-driver-card" id="addDriverBtn">
+            <div class="avatar add-icon">+</div>
+            <div class="driver-info">
+                <p>Add New Driver</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Driver Modal -->
+    <div id="driverModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Driver</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addDriverForm">
+                    <div class="form-group">
+                        <label for="driverName">Driver Name*</label>
+                        <input type="text" id="driverName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="driverPhone">Phone Number</label>
+                        <input type="tel" id="driverPhone" name="phone" pattern="[0-9]{10}" maxlength="10">
+                        <small>10-digit number (optional)</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+                        <button type="submit" class="btn-submit">Add Driver</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Driver Modal -->
+    <div id="editDriverModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Driver</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editDriverForm">
+                    <input type="hidden" id="editDriverId">
+                    <div class="form-group">
+                        <label for="editDriverName">Driver Name*</label>
+                        <input type="text" id="editDriverName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDriverPhone">Phone Number</label>
+                        <input type="tel" id="editDriverPhone" name="phone" pattern="[0-9]{10}" maxlength="10">
+                        <small>10-digit number (optional)</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" id="editCancelBtn">Cancel</button>
+                        <button type="submit" class="btn-submit">Update Driver</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('light-theme');
+            // Save preference to localStorage
+            if (document.body.classList.contains('light-theme')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        
+        // Check for saved theme preference
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+            }
+            
+            // Modal functionality
+            const modal = document.getElementById('driverModal');
+            const editModal = document.getElementById('editDriverModal');
+            const addDriverBtn = document.getElementById('addDriverBtn');
+            const closeBtn = document.querySelector('.close');
+            const editCloseBtn = document.querySelector('#editDriverModal .close');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const editCancelBtn = document.getElementById('editCancelBtn');
+            const form = document.getElementById('addDriverForm');
+            const editForm = document.getElementById('editDriverForm');
+            
+            // Open modal
+            addDriverBtn.addEventListener('click', function() {
+                modal.style.display = 'block';
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+            });
+            
+            // Close modal functions
+            function closeModal() {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+                form.reset();
+            }
+            
+            function closeEditModal() {
+                editModal.classList.remove('show');
+                setTimeout(() => {
+                    editModal.style.display = 'none';
+                }, 300);
+                editForm.reset();
+            }
+            
+            closeBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            editCloseBtn.addEventListener('click', closeEditModal);
+            editCancelBtn.addEventListener('click', closeEditModal);
+            
+            // Close modal if clicked outside
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+                if (event.target === editModal) {
+                    closeEditModal();
+                }
+            });
+            
+            // Edit driver functionality
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const driverCard = this.closest('.driver-card');
+                    const driverId = driverCard.dataset.id;
+                    const driverName = driverCard.dataset.name;
+                    const driverPhone = driverCard.dataset.phone;
+                    
+                    document.getElementById('editDriverId').value = driverId;
+                    document.getElementById('editDriverName').value = driverName;
+                    document.getElementById('editDriverPhone').value = driverPhone;
+                    
+                    editModal.style.display = 'block';
+                    setTimeout(() => {
+                        editModal.classList.add('show');
+                    }, 10);
+                });
+            });
+            
+            // Delete driver functionality
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (confirm('Are you sure you want to delete this driver?')) {
+                        const driverId = this.closest('.driver-card').dataset.id;
+                        
+                        // Send AJAX request to delete driver
+                        fetch('/ajax/delete-driver/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({ id: driverId })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload();
+                            } else {
+                                alert('Error: ' + (data.error || 'Failed to delete driver'));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while deleting the driver');
+                        });
+                    }
+                });
+            });
+            
+            // Handle form submission via AJAX
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('driverName').value,
+                    phone: document.getElementById('driverPhone').value || null
+                };
+                
+                // Send AJAX request
+                fetch('{% url "ajax_create_driver" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload the page to show the new driver
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to add driver'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while adding the driver');
+                });
+            });
+            
+            // Handle edit form submission
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    id: document.getElementById('editDriverId').value,
+                    name: document.getElementById('editDriverName').value,
+                    phone: document.getElementById('editDriverPhone').value || null
+                };
+                
+                // Send AJAX request
+                fetch('/ajax/edit-driver/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to update driver'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating the driver');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
