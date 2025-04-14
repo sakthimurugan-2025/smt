@@ -1,0 +1,145 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+:root {
+  font-size: 16px;
+}
+
+* {
+  padding: 0%;
+  margin: 0%;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "poppins";
+  background-color: aquamarine;
+  display: flex;
+  justify-content: center;
+}
+
+.invoice {
+  background-color: white;
+  padding: 0.5in;
+  width: 8.3in;
+}
+.invoice .line {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+}
+.invoice .line h2 {
+  font-size: 18.62px;
+}
+.invoice .line h1 {
+  font-size: 26.6px;
+  color: #7f7f7f;
+}
+.invoice .info {
+  margin-top: 1.3rem;
+  display: flex;
+  justify-content: space-between;
+}
+.invoice .info .sec {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.invoice .bill-to {
+  margin-top: 1.5rem;
+}
+.invoice .bill-to .head {
+  font-size: 1rem;
+  font-weight: 500;
+}
+.invoice .bill-to .party-info {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+.invoice .bill-to .party-info .party-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+}
+.invoice .main-table {
+  margin-top: 2rem;
+  border-collapse: collapse;
+  width: 100%;
+}
+.invoice .main-table th, .invoice .main-table td {
+  border: 1px solid black;
+  padding: 0.3rem;
+}
+.invoice .main-table th:has(.sub-table), .invoice .main-table td:has(.sub-table) {
+  padding: 0;
+}
+.invoice .main-table .total {
+  font-size: 1.2rem;
+}
+.invoice .sub-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.invoice .sub-table tr:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.invoice .sub-table th, .invoice .sub-table td {
+  border: none;
+}
+.invoice .sub-table.right th, .invoice .sub-table.right td {
+  text-align: end;
+}
+
+.control-card {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+}
+.control-card .control-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.control-card .control-item label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.control-card .control-item input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: "Poppins", sans-serif;
+}
+.control-card button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+.control-card button:hover {
+  background-color: #45a049;
+}
+
+@media print {
+  .invoice {
+    padding: 0% !important;
+  }
+  body {
+    background-color: white !important;
+  }
+  .control-card {
+    display: none !important;
+  }
+}/*# sourceMappingURL=invoice.css.map */

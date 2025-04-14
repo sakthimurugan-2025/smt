@@ -1,0 +1,161 @@
+.payment-container {
+  padding: 20px;
+}
+.payment-container h1 {
+  color: #343a40;
+  margin-bottom: 25px;
+}
+
+.payment-card {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  margin-bottom: 16px;
+  transition: transform 0.2s;
+  overflow: hidden;
+  border: none;
+  width: 100%;
+}
+.payment-card:hover {
+  transform: translateY(-5px);
+}
+
+.party-details {
+  padding: 12px 15px;
+}
+
+.party-name {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.party-location {
+  color: #6c757d;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
+
+.amount-display {
+  background-color: #f8f9fa;
+  padding: 12px 15px;
+  border-left: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  border-radius: 0.5rem;
+}
+
+.amount-title {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-bottom: 3px;
+}
+
+.pending-amount {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #dc3545;
+}
+
+.amount-item {
+  margin-bottom: 3px;
+  font-size: 0.8rem;
+}
+
+.make-payment {
+  width: 100%;
+  margin-top: 10px;
+  padding: 0.25rem 0.5rem;
+}
+
+#paymentModal .modal-content {
+  border-radius: 8px;
+}
+#paymentModal .modal-header {
+  background-color: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+#paymentModal .form-label {
+  font-weight: 500;
+}
+#paymentModal #pendingAmount {
+  font-weight: bold;
+  color: #dc3545;
+}
+
+body {
+  font-family: "Poppins", Arial, sans-serif;
+  background-color: #1a1a1a;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+body.light-theme {
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+nav {
+  display: flex;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  box-sizing: border-box;
+  margin-bottom: 2rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  background-color: #242424;
+}
+nav a {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  color: #ffffff;
+  font-weight: 300;
+}
+nav a svg {
+  fill: #ffffff;
+}
+nav h2 {
+  font-size: 2rem;
+  margin: 0;
+  color: #ffffff;
+}
+
+#themeToggle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem;
+  background: #242424;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#themeToggle svg {
+  fill: #ffffff;
+}
+
+body.light-theme nav {
+  background-color: white;
+}
+body.light-theme nav a {
+  color: #000000;
+}
+body.light-theme nav a svg {
+  fill: #000000;
+}
+body.light-theme nav h2 {
+  color: #000000;
+}
+body.light-theme #themeToggle {
+  background-color: white;
+}
+body.light-theme #themeToggle svg {
+  fill: #000000;
+}/*# sourceMappingURL=payments.css.map */

@@ -1,0 +1,109 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+:root {
+  font-size: 14px;
+}
+
+* {
+  margin: 0%;
+  padding: 0%;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "poppins";
+  background-color: hsl(0, 0%, 90%);
+}
+
+nav {
+  display: flex;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  box-sizing: border-box;
+  margin-bottom: 2rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  background-color: white;
+}
+nav a {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  color: #000000;
+  font-weight: 300;
+}
+nav a svg {
+  fill: #000000;
+}
+nav h2 {
+  font-size: 2rem;
+}
+
+.container {
+  width: 95%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+.container .table-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+table thead {
+  border-bottom: 2px solid #e0e0e0;
+}
+table thead th {
+  text-align: left;
+  padding: 1rem 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+table tbody tr:hover {
+  background-color: #f8f8f8;
+}
+table tbody tr td {
+  padding: 1rem 0.5rem;
+  color: #555;
+}
+table tbody tr td:first-child {
+  font-weight: 500;
+}
+table tbody tr .no-data {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+  font-style: italic;
+}
+
+.view-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #3498db;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s, transform 0.1s;
+  border: none;
+  cursor: pointer;
+}
+.view-btn:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+.view-btn:active {
+  transform: translateY(0);
+}/*# sourceMappingURL=invoices.css.map */

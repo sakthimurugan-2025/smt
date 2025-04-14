@@ -1,0 +1,281 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+body {
+  font-family: "Poppins", Arial, sans-serif;
+  background-color: #1a1a1a;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+body.light-theme {
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+nav {
+  display: flex;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  box-sizing: border-box;
+  margin-bottom: 2rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  background-color: white;
+}
+nav a {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  color: #000000;
+  font-weight: 300;
+}
+nav a svg {
+  fill: #000000;
+}
+nav h2 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+body.dark-theme {
+  background-color: #1a1a1a;
+  color: #f4f4f4;
+}
+body.dark-theme nav {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+body.dark-theme nav a {
+  color: #ffffff;
+}
+body.dark-theme nav a svg {
+  fill: #ffffff;
+}
+
+.party-header {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 0 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.party-header h1 {
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+  color: #333;
+}
+.party-header .party-details p {
+  margin: 0.3rem 0;
+  font-size: 1rem;
+}
+.party-header .party-details p span {
+  font-weight: 600;
+  color: #666;
+}
+
+.payment-summary {
+  display: flex;
+  flex-direction: column;
+  min-width: 230px;
+}
+.payment-summary .summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0;
+}
+.payment-summary .summary-item .label {
+  font-weight: 600;
+  color: #666;
+}
+.payment-summary .summary-item .value {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.payment-summary .summary-item.pending {
+  border-top: 1px solid #ddd;
+  padding-top: 0.75rem;
+}
+.payment-summary .summary-item.pending .value {
+  color: #e74c3c;
+  font-size: 1.3rem;
+}
+.payment-summary .make-payment-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.payment-summary .make-payment-btn:hover {
+  background-color: #2980b9;
+}
+
+.payments-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 0 1.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.payments-section h2 {
+  margin-top: 0;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.payment-table-container {
+  overflow-x: auto;
+}
+
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.payment-table th, .payment-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+.payment-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+.payment-table .no-payments {
+  text-align: center;
+  color: #999;
+  padding: 2rem;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.modal .modal-content {
+  background-color: #ffffff;
+  margin: 10% auto;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+}
+.modal .modal-content h2 {
+  margin-top: 0;
+  color: #333;
+}
+.modal .modal-content .close {
+  position: absolute;
+  right: 1.5rem;
+  top: 1.5rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #aaa;
+}
+.modal .modal-content .close:hover {
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #666;
+}
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: "Poppins", sans-serif;
+}
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+.form-group .amount-hint {
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  color: #777;
+  font-style: italic;
+}
+.form-group button[type=submit] {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 1rem;
+}
+.form-group button[type=submit]:hover {
+  background-color: #2980b9;
+}
+
+/* Dark theme adjustments */
+body.dark-theme .party-header, body.dark-theme .payments-section, body.dark-theme .modal-content {
+  background-color: #2c2c2c;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+body.dark-theme .party-header h1, body.dark-theme .party-header h2, body.dark-theme .payments-section h1, body.dark-theme .payments-section h2, body.dark-theme .modal-content h1, body.dark-theme .modal-content h2 {
+  color: #f4f4f4;
+}
+body.dark-theme .party-header .party-details p span, body.dark-theme .payments-section .party-details p span, body.dark-theme .modal-content .party-details p span {
+  color: #bbb;
+}
+body.dark-theme .payment-summary .summary-item .label {
+  color: #bbb;
+}
+body.dark-theme .payment-summary .summary-item.pending {
+  border-top: 1px solid #444;
+}
+body.dark-theme .payment-table th {
+  background-color: #333;
+  color: #f4f4f4;
+}
+body.dark-theme .payment-table th, body.dark-theme .payment-table td {
+  border-bottom: 1px solid #444;
+}
+body.dark-theme .payment-table .no-payments {
+  color: #888;
+}
+body.dark-theme .form-group label {
+  color: #bbb;
+}
+body.dark-theme .form-group .amount-hint {
+  color: #999;
+}
+body.dark-theme .form-group input, body.dark-theme .form-group select {
+  background-color: #333;
+  border: 1px solid #444;
+  color: #f4f4f4;
+}
+
+@media (max-width: 768px) {
+  .party-header {
+    flex-direction: column;
+  }
+  .party-header .payment-summary {
+    margin-top: 1.5rem;
+  }
+}/*# sourceMappingURL=payment-details.css.map */

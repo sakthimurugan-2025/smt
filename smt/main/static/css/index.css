@@ -1,0 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    padding: 0%;
+    margin: 0%;
+    /* outline: 1px solid red; */
+}
+
+:root {
+    font-size: 16px;
+    --primary-color: rgb(255, 179, 37);
+    --primary-hover: rgb(255, 200, 90);
+    --bg-color: hsl(0, 0%, 10%);
+    --text-color: white;
+    --menu-shadow: 0 0 1rem rgba(0, 0, 0, .5);
+    --transition-speed: 0.3s;
+}
+
+html {
+    font-family: "Poppins";
+}
+
+body {
+    background-color: var(--bg-color);
+}
+
+.wrapper-container {
+    display: flex;
+    justify-content: center;
+}
+
+.wrapper {
+    width: min(90%, 60rem);
+    min-height: 100vh;
+}
+
+.wrapper .head {
+    font-size: 2rem;
+    text-align: center;
+    color: var(--text-color);
+    padding: 2rem 0;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-family: "Bebas Neue";
+    letter-spacing: .3rem;
+}
+
+.menu {
+    width: 100%;
+    margin-top: 1rem;
+
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: repeat(3,6rem);
+    grid-template-areas:
+        "a a b b c "
+        "a a h e e "
+        "d f g g g";
+}
+
+@media (max-width:500px) {
+    .menu {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(8,6rem);
+        grid-template-areas:
+        "a"
+        "b"
+        "c"
+        "d"
+        "e"
+        "f"
+        "g"
+        "h";
+    }
+}
+
+@media (max-width: 768px) {
+    .menu {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(4, 6rem);
+        grid-template-areas:
+            "a a"
+            "b c"
+            "d e"
+            "f g"
+            "h h";
+    }
+}
+
+.menu .option {
+    background-color: var(--primary-color);
+    border-radius: .5rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    color: black;
+    text-decoration: none;
+    box-shadow: var(--menu-shadow);
+}
+
+.menu .option:hover {
+    filter: saturate(150%);
+    outline: 5px solid black;
+    scale: 1.05;
+    transition: all var(--transition-speed);
+}
+
+.menu .option:focus-visible {
+    outline: 5px solid white;
+    scale: 1.05;
+    filter: brightness(110%);
+}
+
+.menu .option:hover>svg {
+    opacity: .5;
+}
+
+.menu .option:active {
+    filter: brightness(50%);
+}
+
+.menu .option .txt {
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 100;
+    user-select: none;
+}
+
+.menu .option svg {
+    position: absolute;
+    height: 100%;
+    top: 0%;
+    right: 0%;
+    width: auto;
+    opacity: .2;
+    fill: white;
+    z-index: 0;
+    transition: .3s;
+}
+
+/* Add a class for theme toggle */
+.light-theme {
+    --bg-color: hsl(0, 0%, 95%);
+    --text-color: black;
+    --menu-shadow: 0 0 1rem rgba(0, 0, 0, .2);
+}
+
+#time-date{
+    position: absolute;
+    top: 1rem; 
+    left: 1rem; 
+    color: var(--text-color);
+    font-weight: 600;
+    text-align: center;
+    #time{
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: .2rem;
+    }
+}

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Entry</title>
+    {% load static %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.27.0/slimselect.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/edit_entry.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/themes/dark.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+</head>
+
+<body>
+    <nav>
+        <a href="{% url 'entry' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+            Back to entries
+        </a>
+        <h2>Edit Entry #{{ entry.id }}</h2>
+    </nav>
+
+    <div class="main-wrapper-container">
+        <div class="main-wrapper">
+            
+            <section class="inp-section" id="party-sec">
+                <div class="s-head">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></svg>
+                    <div class="txt">Party Information</div>
+                </div>
+                <div class="s-body">
+                    <div class="inp-sec">
+                        <label for="#" class="req" id="party-select-label">Party</label>
+                        <select name="party" id="party-select">
+                            <option value="NULL" disabled>Select a Party</option>
+                            {% for party in parties %}
+                                <option value="{{party.id}}" {% if party.id == entry.party.id %}selected{% endif %}>{{party.name}} - {{party.location}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="inp-section" id="location-sec">
+                <div class="s-head">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 400Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Z"/></svg>
+                    <div class="txt">Location Information</div>
+                </div>
+                <div class="s-body">
+                    <div class="inp-sec">
+                        <label for="#" class="req">From</label>
+                        <input type="text" id="l_from" value="{{ entry.customer_from }}">
+                    </div>
+                    <div class="inp-sec">
+                        <label for="#" class="req">To</label>
+                        <input type="text" id="l_to" value="{{ entry.customer_to }}">
+                    </div>
+                </div>
+            </section>
+
+            <section class="inp-section" id="date-sec">
+                <div class="s-head">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M580-240q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Z"/></svg>
+                    <div class="txt">Date Information</div>
+                </div>
+                <div class="s-body">
+                    <div class="inp-sec">
+                        <label for="#" class="req">Date</label>
+                        <input type="text" id="entry-date" value="{{ entry.date|date:'d-m-Y' }}">
+                    </div>
+                </div>
+            </section>
+
+            <section class="inp-section" id="vehicle-sec">
+                <div class="s-head">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M240-160q-50 0-85-35t-35-85H40v-440q0-33 23.5-56.5T120-800h560v160h120l120 160v200h-80q0 50-35 85t-85 35q-50 0-85-35t-35-85H360q0 50-35 85t-85 35Zm0-80q17 0 28.5-11.5T280-280q0-17-11.5-28.5T240-320q-17 0-28.5 11.5T200-280q0 17 11.5 28.5T240-240Zm480 0q17 0 28.5-11.5T760-280q0-17-11.5-28.5T720-320q-17 0-28.5 11.5T680-280q0 17 11.5 28.5T720-240Zm-40-200h170l-90-120h-80v120Z"/></svg>
+                    <div class="txt">Vehicle Information</div>
+                </div>
+                <div class="s-body">
+                    <div class="inp-sec">
+                        <label for="#" class="req">Choose Vehicle</label>
+                        <select id="vehicle-select">
+                            <option value="NULL" disabled>Select a Vehicle</option>
+                            {% for vehicle in vehicles %}
+                                <option value="{{vehicle.id}}" {% if vehicle.id == entry.vehicle.id %}selected{% endif %}>{{vehicle.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="inp-sec">
+                        <label for="#" class="req">Choose Driver</label>
+                        <select name="driver" id="driver-select">
+                            <option value="NULL" disabled>Select a Driver</option>
+                            {% for driver in drivers %}
+                                <option value="{{driver.id}}" {% if driver.id == entry.driver.id %}selected{% endif %}>{{driver.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="inp-section" id="item-sec">
+                <div class="s-head">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v308L694-306l-85-85-170 169 102 102H200Zm240-320h240v-80H440v80Zm0-160h240v-80H440v80ZM694-80 552-222l57-56 85 85 170-170 56 57L694-80ZM320-440q17 0 28.5-11.5T360-480q0-17-11.5-28.5T320-520q-17 0-28.5 11.5T280-480q0 17 11.5 28.5T320-440Zm0-160q17 0 28.5-11.5T360-640q0-17-11.5-28.5T320-680q-17 0-28.5 11.5T280-640q0 17 11.5 28.5T320-600Z"/></svg>
+                    <div class="txt">Items Information</div>
+                </div>
+                <table id="item-table">
+                    <thead><tr>
+                        <th>Item</th>
+                        <th>Rate</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr></thead>
+                    <tbody id="item-table-body">
+                        <tr id="empty-row">
+                            <td colspan="5">
+                                <div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/></svg>
+                                    <div class="txt">No Items Are Selected</div>    
+                                </div>
+                            </td>
+                        </tr>
+                        {% for item in items %}
+                        <tr class="item-row" data-id="{{ item.id }}" data-item-id="{{ item.item.id }}" data-name="{{ item.item.name }}" data-quantity="{{ item.quantity }}" data-total="{{ item.total }}">
+                            <td>{{ item.item.name }}</td>
+                            <td>{{ item.total|floatformat:2 }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <th>{{ item.total }}</th>
+                            <td><button class="remove-item-btn">X</button></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3">TOTAL</td>
+                            <th id="total-display">{{ entry.total }}</th>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div class="s-body">
+                    <div class="inline-inp">
+                        <div class="inp-sec">
+                            <label for="#" class="req">Choose Item</label>
+                            <select name="item" id="item-select">
+                                <option value="NULL" selected disabled>Select an Item</option>
+                                {% for item in all_items %}
+                                    <option value="{{item.id}}" data-name="{{item.name}}">{{item.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="inp-sec">
+                            <label for="#" class="req">Enter Rate</label>
+                            <input type="text" id="item-rate-inp">
+                        </div>
+                        <div class="inp-sec">
+                            <label for="#" class="req">Enter Quantity</label>
+                            <input type="text" id="item-qty-inp">
+                        </div>
+                        <div class="inp-sec">
+                            <label for="#" class="req">Enter Total</label>
+                            <input type="text" id="item-total-inp">
+                        </div>
+                        <div class="inp-sec">
+                            <button id="add-row-btn">+</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="sub-sec">
+                <a href="{% url 'entry_details' entry.id %}">CANCEL</a>
+                <button type="button" id="update-entry">UPDATE</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <p id="modal-message"></p>
+            <div id="modal-buttons"></div>
+        </div>
+    </div>
+
+    <input type="hidden" id="entry-id" value="{{ entry.id }}">
+    <input type="hidden" id="update-url" value="{% url 'ajax_update_entry' %}">
+    <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.27.0/slimselect.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script src="{% static 'js/edit_entry.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll("select").forEach(select => {
+                new SlimSelect({ select: select });
+            });
+            
+            flatpickr("#entry-date", {
+                enableTime: false,
+                dateFormat: "d-m-Y"
+            });
+        });
+    </script>
+</body>
+</html>

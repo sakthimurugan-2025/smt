@@ -1,0 +1,202 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Details</title>
+    <link rel="stylesheet" href="{% static 'css/payment-details.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+            Back to home
+        </a>
+        <h2>Payment Details</h2>
+    </nav>
+    
+    <div class="party-header">
+        <div class="party-info">
+            <h1>{{ party.name }}</h1>
+            <div class="party-details">
+                {% if party.location %}<p><span>Location:</span> {{ party.location }}</p>{% endif %}
+                {% if party.phone %}<p><span>Phone:</span> {{ party.phone }}</p>{% endif %}
+                {% if party.gst %}<p><span>GST:</span> {{ party.gst }}</p>{% endif %}
+            </div>
+        </div>
+        <div class="payment-summary">
+            <div class="summary-item">
+                <span class="label">Total Amount</span>
+                <span class="value">₹{{ total }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Paid</span>
+                <span class="value">₹{{ paid }}</span>
+            </div>
+            <div class="summary-item pending">
+                <span class="label">Pending</span>
+                <span class="value">₹{{ pending }}</span>
+            </div>
+            <button class="make-payment-btn" id="makePaymentBtn">Make Payment</button>
+        </div>
+    </div>
+
+    <div class="payments-section">
+        <h2>Payment History</h2>
+        <div class="payment-table-container">
+            <table class="payment-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.date|date:"d-m-Y" }}</td>
+                        <td>₹{{ payment.amount }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="no-payments">No payments have been made yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Make a Payment</h2>
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label for="amount">Amount</label>
+                    <input type="number" id="amount" name="amount" required min="1" max="{{ pending }}" step="0.01">
+                    <p class="amount-hint">Maximum allowed: ₹{{ pending }}</p>
+                </div>
+                <input type="hidden" name="party_id" value="{{ party.id }}">
+                <button type="submit">Submit Payment</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('paymentModal');
+            const btn = document.getElementById('makePaymentBtn');
+            const closeBtn = document.querySelector('.close');
+            const amountInput = document.getElementById('amount');
+            const paymentForm = document.getElementById('paymentForm');
+            const maxAmount = "{{ pending }}";
+            
+            // Restrict input to valid numbers only
+            amountInput.addEventListener('input', function(e) {
+                let value = this.value;
+                
+                // Remove non-numeric characters (except decimal point)
+                value = value.replace(/[^\d.]/g, '');
+                
+                // Ensure only one decimal point
+                const decimalCount = (value.match(/\./g) || []).length;
+                if (decimalCount > 1) {
+                    value = value.replace(/\.(?=.*\.)/g, '');
+                }
+                
+                // Check against max value
+                if (parseFloat(value) > maxAmount) {
+                    value = maxAmount;
+                }
+                
+                this.value = value;
+            });
+            
+            btn.addEventListener('click', function() {
+                modal.style.display = 'block';
+            });
+            
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Handle form submission with AJAX
+            paymentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const amount = document.getElementById('amount').value;
+                const partyId = "{{ party.id }}";
+                
+                // Show loading state
+                Swal.fire({
+                    title: 'Processing Payment',
+                    text: 'Please wait...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                fetch('/ajax/process-payment/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: amount,
+                        party_id: partyId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Close modal
+                        modal.style.display = 'none';
+                        
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Payment Successful',
+                            text: data.message,
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            // Reload page to show updated data
+                            location.reload();
+                        });
+                    } else {
+                        // Show error message
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Payment Failed',
+                            text: data.error || 'An error occurred while processing the payment.',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Failed',
+                        text: 'An unexpected error occurred. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

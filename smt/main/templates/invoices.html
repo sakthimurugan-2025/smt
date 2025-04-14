@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices</title>
+    <link rel="stylesheet" href="{% static 'css/invoices.css' %}">
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+            Back to home
+        </a>
+        <h2>Invoices</h2>
+    </nav>
+
+    <div class="container">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice ID</th>
+                        <th>Party</th>
+                        <th>From Date</th>
+                        <th>To Date</th>
+                        <th>Total Entries</th>
+                        <th>Total Amount</th>
+                        <th>Paid Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for invoice in invoices %}
+                    <tr>
+                        <td>{{ invoice.id }}</td>
+                        <td>
+                            {% with first_item=invoice.invoiceitem_set.first %}
+                                {% if first_item %}
+                                    {{ first_item.entry.party.name }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td>{{ invoice.f_date }}</td>
+                        <td>{{ invoice.t_date }}</td>
+                        <td>{{ invoice.invoiceitem_set.count }}</td>
+                        <td style="text-align: end;"> 
+                            ₹ {{ invoice.total }}
+                        </td>
+                        <td style="text-align: end;">
+                            ₹ {{ invoice.paid }}
+                        </td>
+                        <td>
+                            <a href="{% url 'invoice_details' invoice.id %}" class="view-btn">View Details</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8" class="no-data">No invoices found</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
