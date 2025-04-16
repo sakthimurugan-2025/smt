@@ -286,9 +286,15 @@ def display_invoice_view(request, invoice_id):
     items = invoice.invoiceitem_set.all()[::-1]
     # recalculate_all_totals_and_counts()
     
+    # Get the party from the first invoice item's entry (if items exist)
+    party = None
+    if items and len(items) > 0:
+        party = items[0].entry.party
+    
     return render(request, "invoice.html", {
         "invoice": invoice,
         "items": items,
+        "party": party,
     })
 
 @csrf_exempt
