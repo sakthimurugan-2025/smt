@@ -8,10 +8,14 @@ from django.shortcuts import redirect
 import requests
 
 def home_view(request):
+    if  not request.user.is_authenticated:
+        return redirect('login')
     return render(request,"index.html")
 
 def create_entry_view(request):
-
+    
+    if  not request.user.is_authenticated:
+        return redirect('login')
     return render(request,"create_entry.html",{
         "parties":Party.objects.all(),
         "vehicles":Vehicle.objects.all(),
@@ -21,6 +25,9 @@ def create_entry_view(request):
 
 @csrf_exempt
 def create_entry(request):
+    
+    if  not request.user.is_authenticated:
+        return redirect('login')
     if request.method == 'POST':
         data = json.loads(request.body)
         try:
@@ -54,17 +61,24 @@ def create_entry(request):
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 def driver_view(request):
+    
+    if  not request.user.is_authenticated:
+        return redirect('login')
     return render(request,"driver.html",{
         "drivers":Driver.objects.all()
     })
 
 def vehicle_view(request):
+    if  not request.user.is_authenticated:
+        return redirect('login')
     return render(request,"vehicle.html",{
         "vehicles": Vehicle.objects.all(),
         "companies": VehicleCompany.objects.all()  # Pass companies for the select dropdown
     })
 
 def entry_view(request):
+    if  not request.user.is_authenticated:
+        return redirect('login')
     entries = Entry.objects.all()
     parties = Party.objects.all()
     vehicles = Vehicle.objects.all()
@@ -82,6 +96,8 @@ def entry_view(request):
     })
 
 def entry_details_view(request, entry_id):
+    if  not request.user.is_authenticated:
+        return redirect('login')
     entry = Entry.objects.get(pk=entry_id)
     return render(request, "entry-details.html", {"entry": entry})
 
@@ -100,12 +116,16 @@ def delete_entry_ajax(request):
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 def parties_view(request):
+    if  not request.user.is_authenticated:
+        return redirect('login')
     parties = Party.objects.all()
     return render(request,"parties.html",{
         "parties":parties
     })
 
 def party_details_view(request, party_id):
+    if  not request.user.is_authenticated:
+        return redirect('login')
     party = Party.objects.get(pk=party_id)
     entries = Entry.objects.filter(party=party).order_by('-date')
     
