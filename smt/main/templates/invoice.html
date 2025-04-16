@@ -21,7 +21,8 @@
             <div class="sec">
                 Thingalur,<br>
                 Erode - 638055 <br>
-                Phone: +91 9876 54321
+                Phone: +91 9487322372 <br>
+                Phone: +91 9965551118 <br>
             </div>
             <div class="sec">
                 <p>Date from: <b>{{ invoice.f_date }}</b></p>
@@ -32,16 +33,22 @@
         <div class="bill-to">
             <div class="head">Bill to:</div>
             <div class="party-info">
-                <div class="party-name">{{ items.first.entry.party.name }}</div>
-                <div class="party-address">
-                    {{ items.first.entry.party.address }}
-                </div>
-                <div class="party-phone">
-                    Phone : {{ items.first.entry.party.phone }}
-                </div>
-                <div class="party-gst">
-                    GST : {{ items.first.entry.party.gst }}
-                </div>
+                {% if party %}
+                    <div class="party-name">{{ party.name }}</div>
+                    <div class="party-address">
+                        {{ party.location }}
+                    </div>
+                    <div class="party-phone">
+                        Phone : {{ party.phone }}
+                    </div>
+                    {% if party.gst %}
+                    <div class="party-gst">
+                        GST : {{ party.gst }}
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="party-name">No party information available</div>
+                {% endif %}
             </div>
         </div>
 
