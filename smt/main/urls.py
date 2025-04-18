@@ -24,6 +24,8 @@ urlpatterns = [
     path('payment-details/<int:party_id>', payment_details_view, name='payment_details'),
     
     path("backup/",backup_view,name="backup"),
+    
+    path("items/", items_view, name="items"),
 ]
 
 # AJAX URLS
@@ -41,5 +43,8 @@ urlpatterns.extend([
     path('ajax/edit-driver/', edit_driver_ajax, name='ajax_edit_driver'),
     path('ajax/create-party/', create_party, name='ajax_create_party'),
     path('ajax/process-payment/', process_payment, name='ajax_process_payment'),
+    path('ajax/create-item/', create_item, name='ajax_create_item'),
+    path('ajax/edit-item/', edit_item_ajax, name='ajax_edit_item'),
+    path('ajax/delete-item/', delete_item_ajax, name='ajax_delete_item'),
 ])
 

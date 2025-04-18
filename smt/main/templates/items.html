@@ -1,0 +1,329 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Items</title>
+    <link rel="stylesheet" href="{% static 'css/items.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+            Back to home
+        </a>
+        <h2>Items Management</h2>
+    </nav>
+    <button id="themeToggle" aria-label="Toggle dark/light theme" 
+            style="position: absolute; top: 1rem; right: 1rem; padding: 0.5rem; 
+                   background: var(--primary-color); border: none; border-radius: 50%; 
+                   cursor: pointer; width: 40px; height: 40px; display: flex; 
+                   align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
+            <path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm0-18c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8z"/>
+            <path d="M12 17v-10v10z" fill="currentColor"/>
+        </svg>
+    </button>
+    <div class="item-grid">
+        {% for item in items %}
+            <div class="item-card" data-id="{{ item.id }}" data-name="{{ item.name }}">
+                <div class="avatar">{{ item.name|slice:":1" }}</div>
+                <div class="item-info">
+                    <p>{{ item.name }}</p>
+                </div>
+                <div class="item-actions">
+                    <button class="edit-btn" title="Edit item">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" width="18">
+                            <path d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+        
+        <!-- Add New Item Card -->
+        <div class="item-card add-item-card" id="addItemBtn">
+            <div class="avatar add-icon">+</div>
+            <div class="item-info">
+                <p>Add New Item</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Item</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addItemForm">
+                    <div class="form-group">
+                        <label for="itemName">Item Name*</label>
+                        <input type="text" id="itemName" name="name" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+                        <button type="submit" class="btn-submit">Add Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="editItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Item</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editItemForm">
+                    <input type="hidden" id="editItemId">
+                    <div class="form-group">
+                        <label for="editItemName">Item Name*</label>
+                        <input type="text" id="editItemName" name="name" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" id="editCancelBtn">Cancel</button>
+                        <button type="submit" class="btn-submit">Update Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        // Theme toggle functionality
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('light-theme');
+            // Save preference to localStorage
+            if (document.body.classList.contains('light-theme')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        
+        // Check for saved theme preference
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+            }
+            
+            // Modal functionality
+            const modal = document.getElementById('itemModal');
+            const editModal = document.getElementById('editItemModal');
+            const addItemBtn = document.getElementById('addItemBtn');
+            const closeBtn = document.querySelector('#itemModal .close');
+            const editCloseBtn = document.querySelector('#editItemModal .close');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const editCancelBtn = document.getElementById('editCancelBtn');
+            const form = document.getElementById('addItemForm');
+            const editForm = document.getElementById('editItemForm');
+            
+            // Open modal
+            addItemBtn.addEventListener('click', function() {
+                modal.style.display = 'block';
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+            });
+            
+            // Close modal functions
+            function closeModal() {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+                form.reset();
+            }
+            
+            function closeEditModal() {
+                editModal.classList.remove('show');
+                setTimeout(() => {
+                    editModal.style.display = 'none';
+                }, 300);
+                editForm.reset();
+            }
+            
+            closeBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            editCloseBtn.addEventListener('click', closeEditModal);
+            editCancelBtn.addEventListener('click', closeEditModal);
+            
+            // Close modal if clicked outside
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+                if (event.target === editModal) {
+                    closeEditModal();
+                }
+            });
+            
+            // Edit item functionality
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const itemCard = this.closest('.item-card');
+                    const itemId = itemCard.dataset.id;
+                    const itemName = itemCard.dataset.name;
+                    
+                    document.getElementById('editItemId').value = itemId;
+                    document.getElementById('editItemName').value = itemName;
+                    
+                    editModal.style.display = 'block';
+                    setTimeout(() => {
+                        editModal.classList.add('show');
+                    }, 10);
+                });
+            });
+            
+            // Configure SweetAlert2 theme based on user preference
+            const updateSwalTheme = () => {
+                const isDarkTheme = !document.body.classList.contains('light-theme');
+                Swal.getContainer()?.classList.toggle('swal2-dark', isDarkTheme);
+            };
+            
+            // Update SweetAlert theme when page theme changes
+            document.getElementById('themeToggle').addEventListener('click', updateSwalTheme);
+            
+            // Set initial SweetAlert theme
+            updateSwalTheme();
+            
+            // Handle form submission via AJAX
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('itemName').value
+                };
+                
+                // Show loading indicator
+                Swal.fire({
+                    title: 'Adding item...',
+                    text: 'Please wait',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Send AJAX request
+                fetch('/ajax/create-item/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Item added successfully',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            // Reload the page to show the new item
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.error || 'Failed to add item'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while adding the item'
+                    });
+                });
+            });
+            
+            // Handle edit form submission
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    id: document.getElementById('editItemId').value,
+                    name: document.getElementById('editItemName').value
+                };
+                
+                // Show loading indicator
+                Swal.fire({
+                    title: 'Updating item...',
+                    text: 'Please wait',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Send AJAX request
+                fetch('/ajax/edit-item/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Item updated successfully',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.error || 'Failed to update item'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating the item'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

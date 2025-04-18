@@ -11,6 +11,7 @@ def home_view(request):
     return render(request,"index.html")
 
 def create_entry_view(request):
+
     return render(request,"create_entry.html",{
         "parties":Party.objects.all(),
         "vehicles":Vehicle.objects.all(),
@@ -676,5 +677,68 @@ def update_entry_ajax(request):
             return JsonResponse({'success': True})
         except Exception as e:
             print(e)
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+def items_view(request):
+    items = Item.objects.all()
+    return render(request, "items.html", {
+        "items": items
+    })
+
+@csrf_exempt
+def create_item(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            name = data.get('name')
+            
+            # Basic validation
+            if not name:
+                return JsonResponse({'success': False, 'error': 'Item name is required'})
+            
+            # Create the item
+            item = Item.objects.create(name=name)
+            
+            return JsonResponse({'success': True, 'id': item.id, 'name': item.name})
+        
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+@csrf_exempt
+def delete_item_ajax(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            item_id = data.get('id')
+            item = Item.objects.get(id=item_id)
+            item.delete()
+            return JsonResponse({'success': True})
+        except Item.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Item not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+@csrf_exempt
+def edit_item_ajax(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            item_id = data.get('id')
+            item = Item.objects.get(id=item_id)
+            
+            # Update item fields
+            item.name = data.get('name', item.name)
+            
+            item.save()
+            return JsonResponse({'success': True})
+        except Item.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Item not found'})
+        except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
