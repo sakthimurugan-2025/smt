@@ -615,70 +615,70 @@ def delete_payment_ajax(request):
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 def backup_view(request):
-        bot_api_key = "7218432904:AAH21pSYGFVTP4TCo9QjSu-3DeEkp317YdQ"
-        user_id = "1612462958"
+    bot_api_key = "7218432904:AAH21pSYGFVTP4TCo9QjSu-3DeEkp317YdQ"
+    user_id = "1612462958"
 
-        def send_telegram_file(bot_api_key, user_id, file_path, caption=None):
-            url = f"https://api.telegram.org/bot{bot_api_key}/sendDocument"
-            with open(file_path, 'rb') as file:
-                payload = {
-                    "chat_id": user_id
-                }
-                if caption:
-                    payload["caption"] = caption
-                    
-                files = {
-                    "document": file
-                }
-                response = requests.post(url, data=payload, files=files)
-            return response.json()
+    def send_telegram_file(bot_api_key, user_id, file_path, caption=None):
+        url = f"https://api.telegram.org/bot{bot_api_key}/sendDocument"
+        with open(file_path, 'rb') as file:
+            payload = {
+                "chat_id": user_id
+            }
+            if caption:
+                payload["caption"] = caption
 
-        try:
-            # Fetch all data from the database
-            parties = list(Party.objects.all().values())
-            vehicles = list(Vehicle.objects.all().values())
-            drivers = list(Driver.objects.all().values())
-            entries = list(Entry.objects.all().values())
-            items = list(Item.objects.all().values())
-            invoices = list(Invoice.objects.all().values())
-            # payments = list(Payment.objects.all().values())
+            files = {
+                "document": file
+            }
+            response = requests.post(url, data=payload, files=files)
+        return response.json()
 
-            # Combine all data into a single list of dictionaries for loaddata format
-            data = []
-            for model_name, objects in [
-                ("app_name.party", parties),
-                ("app_name.vehicle", vehicles),
-                ("app_name.driver", drivers),
-                ("app_name.entry", entries),
-                ("app_name.item", items),
-                ("app_name.invoice", invoices),
-                # ("app_name.payment", payments),
-            ]:
-                for obj in objects:
-                    data.append({
-                        "model": model_name,
-                        "pk": obj["id"],
-                        "fields": {k: v for k, v in obj.items() if k != "id"}
-                    })
+    try:
+        # Fetch all data from the database
+        parties = list(Party.objects.all().values())
+        vehicles = list(Vehicle.objects.all().values())
+        drivers = list(Driver.objects.all().values())
+        entries = list(Entry.objects.all().values())
+        items = list(Item.objects.all().values())
+        invoices = list(Invoice.objects.all().values())
+        payments = list(Payment.objects.all().values())
 
-            # Convert data to JSON
-            json_data = json.dumps(data, indent=4, default=str)
+        # Combine all data into a single list of dictionaries for loaddata format
+        data = []
+        for model_name, objects in [
+            ("app_name.party", parties),
+            ("app_name.vehicle", vehicles),
+            ("app_name.driver", drivers),
+            ("app_name.entry", entries),
+            ("app_name.item", items),
+            ("app_name.invoice", invoices),
+            ("app_name.payment", payments),
+        ]:
+            for obj in objects:
+                data.append({
+                    "model": model_name,
+                    "pk": obj["id"],
+                    "fields": {k: v for k, v in obj.items() if k != "id"}
+                })
 
-            # Save JSON data to a file
-            file_path = "data.json"
-            with open(file_path, "w") as file:
-                file.write(json_data)
+        # Convert data to JSON
+        json_data = json.dumps(data, indent=4, default=str)
 
-            # Send the file to Telegram
-            send_telegram_file(bot_api_key, user_id, file_path)
-            
-            # Also send the static data_utf8.json file with the #file: prefix
-            utf8_file_path = "d:\\PROGRAMMING\\SMT\\smt\\data_utf8.json"
-            send_telegram_file(bot_api_key, user_id, utf8_file_path, caption="#file:data_utf8.json")
+        # Save JSON data to a file
+        file_path = "data.json"
+        with open(file_path, "w") as file:
+            file.write(json_data)
 
-            return JsonResponse({'success': True, 'message': 'Backup files sent to Telegram successfully'})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+        # Send the file to Telegram
+        send_telegram_file(bot_api_key, user_id, file_path)
+
+        # Also send the static data_utf8.json file with the #file: prefix
+        utf8_file_path = "d:\\PROGRAMMING\\SMT\\smt\\data_utf8.json"
+        send_telegram_file(bot_api_key, user_id, utf8_file_path, caption="#file:data_utf8.json")
+
+        return JsonResponse({'success': True, 'message': 'Backup files sent to Telegram successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 def edit_entry_view(request, entry_id):
     entry = Entry.objects.get(pk=entry_id)
