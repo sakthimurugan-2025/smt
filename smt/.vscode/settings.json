@@ -1,0 +1,32 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "main/__pycache__": true,
+        "main/migrations": true,
+        "smt/__pycache__": true,
+        "manage.py": true,
+        "smt/wsgi.py": true,
+        "smt/asgi.py": true,
+        "smt/__init__.py": true,
+        "main/__init__.py": true,
+        ".venv": true,
+        ".vscode": true
+    },
+    "hide-files.files": [
+        "main/__pycache__",
+        "main/migrations",
+        "smt/__pycache__",
+        "manage.py",
+        "smt/wsgi.py",
+        "smt/asgi.py",
+        "smt/__init__.py",
+        "main/__init__.py",
+        ".venv",
+        ".vscode"
+    ],
+    "liveSassCompile.settings.showOutputWindowOn": "None"
+}

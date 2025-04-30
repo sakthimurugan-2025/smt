@@ -1,0 +1,463 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ party.name }} - Payment Details</title>
+    <link rel="stylesheet" href="{% static 'css/payment_details.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+    <nav>
+        <a href="{% url 'payment' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="white">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+            Back to Payments
+        </a>
+        <h2>{{ party.name }} - Payment Details</h2>
+    </nav>
+    
+    <button id="themeToggle" aria-label="Toggle dark/light theme" 
+            style="position: absolute; top: 1rem; right: 1rem; padding: 0.5rem; 
+                   border-radius: 50%; width: 40px; height: 40px; display: flex; 
+                   align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor">
+            <path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm0-18c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8z"/>
+            <path d="M12 17v-10v10z" fill="currentColor"/>
+        </svg>
+    </button>
+    
+    <div class="container">
+        <div class="page-header">
+            <h2>Payment History</h2>
+            <button class="btn btn-primary" id="addPaymentBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                Add Payment
+            </button>
+        </div>
+        
+        <div class="balance-summary">
+            <div class="summary-card pending-amount">
+                <div class="title">Pending Amount</div>
+                <div class="value">₹ {{ credit_sum }}</div>
+            </div>
+            <div class="summary-card received-amount">
+                <div class="title">Received Amount</div>
+                <div class="value">₹ {{ debit_sum }}</div>
+            </div>
+            <div class="summary-card balance-amount">
+                <div class="title">Balance</div>
+                <div class="value {% if balance > 0 %}amount-pending{% elif balance < 0 %}amount-received{% endif %}">
+                    ₹ {{ balance|floatformat:2 }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls-container">
+            <div class="search-filter-container">
+                <div class="search-container">
+                    <input type="text" id="paymentSearch" placeholder="Search payments...">
+                    <div class="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor">
+                            <path d="M0 0h24v24H0V0z" fill="none"/>
+                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="filter-container">
+                    <label for="filterPayment">Filter:</label>
+                    <select id="filterPayment">
+                        <option value="all">All Payments</option>
+                        <option value="pending">Pending Only</option>
+                        <option value="received">Received Only</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        {% if payments %}
+        <div class="table-container">
+            <table id="paymentsTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Pending Amount</th>
+                        <th>Received Amount</th>
+                        <th>Invoice</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr data-payment-id="{{ payment.id }}" data-payment-date="{{ payment.date|date:'Y-m-d' }}"
+                        data-pending="{{ payment.pending_amount|default:'0' }}" 
+                        data-received="{{ payment.received_amount|default:'0' }}">
+                        <td>{{ payment.date|date:"d-m-Y" }}</td>
+                        <td class="amount-pending">
+                            {% if payment.pending_amount %}
+                                ₹ {{ payment.pending_amount }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="amount-received">
+                            {% if payment.received_amount %}
+                                ₹ {{ payment.received_amount }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if payment.invoice %}
+                                <a href="{% url 'invoice_details' payment.invoice.id %}" class="invoice-link">
+                                    Invoice #{{ payment.invoice.id }}
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="actions">
+                            <button class="action-btn delete-btn" data-id="{{ payment.id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <h3>No payment history</h3>
+            <p>There are no payment records for this party yet. Click "Add Payment" to create one.</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Add Payment Modal -->
+    <div id="addPaymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Payment</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="errorContainer" class="error-container"></div>
+                <form id="addPaymentForm">
+                    <input type="hidden" id="partyId" value="{{ party.id }}">
+                    
+                    <div class="form-group">
+                        <label for="paymentDate">Date*</label>
+                        <input type="text" id="paymentDate" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pendingAmount">Pending Amount</label>
+                            <input type="number" id="pendingAmount" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="receivedAmount">Received Amount</label>
+                            <input type="number" id="receivedAmount" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="invoiceSelect">Related Invoice (Optional)</label>
+                        <select id="invoiceSelect">
+                            <option value="">Select Invoice</option>
+                            {% for invoice in invoices %}
+                                <option value="{{ invoice.id }}">Invoice #{{ invoice.id }} - ₹{{ invoice.total }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="savePaymentBtn">Save Payment</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script>
+        // Theme toggle functionality
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('light-theme');
+            // Save preference to localStorage
+            if (document.body.classList.contains('light-theme')) {
+                localStorage.setItem('theme', 'light');
+                updateSweetAlertTheme('light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+                updateSweetAlertTheme('dark');
+            }
+        });
+        
+        // Check for saved theme preference
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+                updateSweetAlertTheme('light');
+            } else {
+                updateSweetAlertTheme('dark');
+            }
+            
+            // Initialize flatpickr
+            flatpickr("#paymentDate", {
+                dateFormat: "Y-m-d",
+                defaultDate: new Date()
+            });
+        });
+        
+        // Update SweetAlert theme
+        function updateSweetAlertTheme(theme) {
+            if (theme === 'light') {
+                Swal.getContainer()?.classList.add('swal2-light');
+                Swal.getContainer()?.classList.remove('swal2-dark');
+            } else {
+                Swal.getContainer()?.classList.add('swal2-dark');
+                Swal.getContainer()?.classList.remove('swal2-light');
+            }
+        }
+        
+        // Modal handling
+        const addPaymentModal = document.getElementById('addPaymentModal');
+        const addPaymentBtn = document.getElementById('addPaymentBtn');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const cancelBtn = document.querySelector('.cancel-btn');
+        const savePaymentBtn = document.getElementById('savePaymentBtn');
+        
+        // Open modal
+        addPaymentBtn.addEventListener('click', function() {
+            // Reset form
+            document.getElementById('addPaymentForm').reset();
+            document.getElementById('errorContainer').innerHTML = '';
+            
+            // Set today's date
+            const dateInput = document.getElementById('paymentDate');
+            if (dateInput._flatpickr) {
+                dateInput._flatpickr.setDate(new Date());
+            }
+            
+            // Show modal
+            addPaymentModal.style.display = 'block';
+        });
+        
+        // Close modal functions
+        function closeModal() {
+            addPaymentModal.style.display = 'none';
+        }
+        
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        
+        window.addEventListener('click', function(event) {
+            if (event.target === addPaymentModal) {
+                closeModal();
+            }
+        });
+        
+        // Save payment
+        savePaymentBtn.addEventListener('click', function() {
+            const errorContainer = document.getElementById('errorContainer');
+            errorContainer.innerHTML = '';
+            
+            const partyId = document.getElementById('partyId').value;
+            const date = document.getElementById('paymentDate').value;
+            const pendingAmount = document.getElementById('pendingAmount').value;
+            const receivedAmount = document.getElementById('receivedAmount').value;
+            const invoiceId = document.getElementById('invoiceSelect').value;
+            
+            // Validation
+            if (!date) {
+                errorContainer.innerHTML = 'Date is required';
+                return;
+            }
+            
+            if (!pendingAmount && !receivedAmount) {
+                errorContainer.innerHTML = 'At least one of pending or received amount is required';
+                return;
+            }
+            
+            // Disable button to prevent multiple submissions
+            savePaymentBtn.disabled = true;
+            savePaymentBtn.innerHTML = 'Saving...';
+            
+            // Submit data using fetch API
+            fetch('{% url "ajax_create_payment" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    party_id: partyId,
+                    date: date,
+                    pending_amount: pendingAmount,
+                    received_amount: receivedAmount,
+                    invoice_id: invoiceId || null
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal
+                    closeModal();
+                    
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Payment added successfully',
+                        confirmButtonColor: '#4a6cf7'
+                    }).then(() => {
+                        // Reload the page to show the new payment
+                        window.location.reload();
+                    });
+                } else {
+                    // Show error
+                    errorContainer.innerHTML = data.error || 'An error occurred';
+                    savePaymentBtn.disabled = false;
+                    savePaymentBtn.innerHTML = 'Save Payment';
+                }
+            })
+            .catch(error => {
+                errorContainer.innerHTML = 'Network error. Please try again.';
+                console.error('Error:', error);
+                savePaymentBtn.disabled = false;
+                savePaymentBtn.innerHTML = 'Save Payment';
+            });
+        });
+        
+        // Delete payment
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const paymentId = this.getAttribute('data-id');
+                
+                // Confirm deletion
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You're about to delete this payment record. This action cannot be undone!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Submit deletion request
+                        fetch('{% url "ajax_delete_payment" %}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({
+                                id: paymentId
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Payment record has been deleted.',
+                                    'success'
+                                ).then(() => {
+                                    // Remove the row from the table
+                                    document.querySelector(`tr[data-payment-id="${paymentId}"]`).remove();
+                                    
+                                    // If no payments left, show empty state
+                                    if (document.querySelectorAll('#paymentsTable tbody tr').length === 0) {
+                                        document.querySelector('.table-container').remove();
+                                        
+                                        const emptyState = document.createElement('div');
+                                        emptyState.className = 'empty-state';
+                                        emptyState.innerHTML = `
+                                            <h3>No payment history</h3>
+                                            <p>There are no payment records for this party yet. Click "Add Payment" to create one.</p>
+                                        `;
+                                        document.querySelector('.container').appendChild(emptyState);
+                                    }
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    data.error || 'Failed to delete payment',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire(
+                                'Error!',
+                                'An unexpected error occurred',
+                                'error'
+                            );
+                        });
+                    }
+                });
+            });
+        });
+        
+        // Search and filter functionality
+        const paymentSearch = document.getElementById('paymentSearch');
+        const filterPayment = document.getElementById('filterPayment');
+        
+        function applyFilters() {
+            const searchTerm = paymentSearch.value.toLowerCase().trim();
+            const filterValue = filterPayment.value;
+            
+            // Get all payment rows
+            const rows = document.querySelectorAll('#paymentsTable tbody tr');
+            
+            rows.forEach(row => {
+                let showRow = true;
+                
+                // Apply search filter
+                if (searchTerm) {
+                    const date = row.cells[0].textContent.toLowerCase();
+                    const invoiceText = row.cells[3].textContent.toLowerCase();
+                    
+                    const matchesSearch = date.includes(searchTerm) || invoiceText.includes(searchTerm);
+                    showRow = showRow && matchesSearch;
+                }
+                
+                // Apply payment type filter
+                if (filterValue !== 'all') {
+                    const hasPending = row.cells[1].textContent.trim() !== '-';
+                    const hasReceived = row.cells[2].textContent.trim() !== '-';
+                    
+                    if (filterValue === 'pending' && !hasPending) {
+                        showRow = false;
+                    } else if (filterValue === 'received' && !hasReceived) {
+                        showRow = false;
+                    }
+                }
+                
+                // Show/hide row
+                row.style.display = showRow ? '' : 'none';
+            });
+        }
+        
+        // Add event listeners for search and filter
+        paymentSearch?.addEventListener('input', applyFilters);
+        filterPayment?.addEventListener('change', applyFilters);
+    </script>
+</body>
+</html>

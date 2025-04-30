@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party Balances</title>
+    <link rel="stylesheet" href="{% static 'css/payments.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+            Back to home
+        </a>
+        <h2>Party Balances</h2>
+    </nav>
+    <button id="themeToggle" aria-label="Toggle dark/light theme" 
+            style="position: absolute; top: 1rem; right: 1rem; padding: 0.5rem; 
+                   background: var(--primary-color); border: none; border-radius: 50%; 
+                   cursor: pointer; width: 40px; height: 40px; display: flex; 
+                   align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
+            <path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm0-18c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8z"/>
+            <path d="M12 17v-10v10z" fill="currentColor"/>
+        </svg>
+    </button>
+    
+    <div class="controls-container">
+        <div class="search-container">
+            <input type="text" id="partySearch" placeholder="Search parties..." />
+            <div class="search-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor">
+                    <path d="M0 0h24v24H0V0z" fill="none"/>
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="filter-sort-container">
+            <div class="sort-container">
+                <label for="sortSelect">Sort By:</label>
+                <select id="sortSelect">
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="balance-high">Balance (High to Low)</option>
+                    <option value="balance-low">Balance (Low to High)</option>
+                </select>
+            </div>
+            
+            <div class="filter-container">
+                <label for="filterSelect">Filter:</label>
+                <select id="filterSelect">
+                    <option value="all">All Balances</option>
+                    <option value="positive">Positive Balance</option>
+                    <option value="negative">Negative Balance</option>
+                    <option value="zero">Zero Balance</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div class="payment-grid">
+        {% for party in parties %}
+            {% with balance=party.balance %}
+            <a href="{% url 'payment_details' party.id %}" class="party-card-link">
+                <div class="party-card {% if balance > 0 %}positive-balance{% elif balance < 0 %}negative-balance{% else %}zero-balance{% endif %}" 
+                     data-name="{{ party.name }}" 
+                     data-balance="{{ balance|floatformat:2 }}"
+                     data-balance-type="{% if balance > 0 %}positive{% elif balance < 0 %}negative{% else %}zero{% endif %}">
+                    <div class="avatar">{{ party.name|slice:":1" }}</div>
+                    <div class="party-info">
+                        <h3>{{ party.name }}</h3>
+                        {% if party.location %}
+                        <p class="party-detail">{{ party.location }}</p>
+                        {% endif %}
+                        {% if party.phone %}
+                        <p class="party-detail">{{ party.phone }}</p>
+                        {% endif %}
+                        <div class="balance-details">
+                            <p class="balance-total">Balance: 
+                                <span class="{% if balance > 0 %}positive{% elif balance < 0 %}negative{% else %}zero{% endif %}">
+                                    ₹{{ balance|floatformat:2 }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% endwith %}
+        {% empty %}
+            <div class="empty-state">
+                <h3>No parties found</h3>
+                <p>There are no parties in the system yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('light-theme');
+            // Save preference to localStorage
+            if (document.body.classList.contains('light-theme')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        
+        // Check for saved theme preference
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+            }
+        });
+        
+        // Search, Sort and Filter functionality
+        const partySearch = document.getElementById('partySearch');
+        const sortSelect = document.getElementById('sortSelect');
+        const filterSelect = document.getElementById('filterSelect');
+        let partyCards = Array.from(document.querySelectorAll('.party-card'));
+        const paymentGrid = document.querySelector('.payment-grid');
+        const emptyState = document.querySelector('.empty-state');
+        
+        // Function to apply all filtering and sorting
+        function applyFiltersAndSort() {
+            const searchTerm = partySearch.value.toLowerCase().trim();
+            const sortValue = sortSelect.value;
+            const filterValue = filterSelect.value;
+            
+            // First filter the cards
+            const filteredCards = partyCards.filter(card => {
+                const partyName = card.querySelector('h3').textContent.toLowerCase();
+                const partyLocation = card.querySelector('.party-detail') ? 
+                    card.querySelector('.party-detail').textContent.toLowerCase() : '';
+                const balanceType = card.dataset.balanceType;
+                
+                // Search filter
+                const matchesSearch = partyName.includes(searchTerm) || partyLocation.includes(searchTerm);
+                
+                // Balance type filter
+                const matchesBalanceFilter = filterValue === 'all' || balanceType === filterValue;
+                
+                return matchesSearch && matchesBalanceFilter;
+            });
+            
+            // Then sort the filtered cards
+            filteredCards.sort((a, b) => {
+                if (sortValue === 'name-asc') {
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                } else if (sortValue === 'name-desc') {
+                    return b.dataset.name.localeCompare(a.dataset.name);
+                } else if (sortValue === 'balance-high') {
+                    return parseFloat(b.dataset.balance) - parseFloat(a.dataset.balance);
+                } else if (sortValue === 'balance-low') {
+                    return parseFloat(a.dataset.balance) - parseFloat(b.dataset.balance);
+                }
+                return 0;
+            });
+            
+            // Get all card links
+            const cardLinks = Array.from(document.querySelectorAll('.party-card-link'));
+            
+            // Remove all card links from the grid
+            cardLinks.forEach(link => {
+                link.style.display = 'none';
+            });
+            
+            // Add filtered and sorted cards back to the grid (including their parent links)
+            filteredCards.forEach(card => {
+                const parentLink = card.closest('.party-card-link');
+                if (parentLink) {
+                    parentLink.style.display = 'block';
+                    paymentGrid.appendChild(parentLink);
+                }
+            });
+            
+            // Show/hide empty state
+            if (filteredCards.length === 0) {
+                emptyState.style.display = 'block';
+                emptyState.querySelector('h3').textContent = 'No matching parties';
+                emptyState.querySelector('p').textContent = 'Try adjusting your search or filters.';
+            } else {
+                emptyState.style.display = 'none';
+            }
+        }
+        
+        // Add event listeners
+        partySearch.addEventListener('input', applyFiltersAndSort);
+        sortSelect.addEventListener('change', applyFiltersAndSort);
+        filterSelect.addEventListener('change', applyFiltersAndSort);
+        
+        // Initialize with default sort and filter
+        document.addEventListener('DOMContentLoaded', function() {
+            applyFiltersAndSort();
+        });
+    </script>
+</body>
+</html>

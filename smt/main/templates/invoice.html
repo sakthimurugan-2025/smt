@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/invoice.css' %}">
+</head>
+
+<body>
+    <div class="invoice">
+
+        <div class="line">
+            <h2>Sakthi Murugan Auto</h2>
+            <h1>TRANSPORT INVOICE</h1>
+        </div>
+
+        <div class="info">
+            <div class="sec">
+                Thingalur,<br>
+                Erode - 638055 <br>
+                Phone: +91 9487322372 <br>
+                Phone: +91 9965551118 <br>
+            </div>
+            <div class="sec">
+                <p>Date from: <b>{{ invoice.f_date }}</b></p>
+                <p>Date To: <b>{{ invoice.t_date }}</b></p>
+            </div>
+        </div>
+
+        <div class="bill-to">
+            <div class="head">Bill to:</div>
+            <div class="party-info">
+                {% if party %}
+                    <div class="party-name">{{ party.name }}</div>
+                    <div class="party-address">
+                        {{ party.location }}
+                    </div>
+                    <div class="party-phone">
+                        Phone : {{ party.phone }}
+                    </div>
+                    {% if party.gst %}
+                    <div class="party-gst">
+                        GST : {{ party.gst }}
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="party-name">No party information available</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.entry.date }}</td>
+                    <td>{{ item.entry.customer_from }}</td>
+                    <td>{{ item.entry.customer_to }}</td>
+                    <td>
+                        <table class="sub-table">
+                            {% for entry_item in item.entry.entryitem_set.all %}
+                            <tr>
+                                <td>{{ entry_item.item.name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                    <td>
+                        <table class="sub-table right">
+                            {% for entry_item in item.entry.entryitem_set.all %}
+                            <tr>
+                                <td>{{ entry_item.quantity }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                    <td>
+                        <table class="sub-table right">
+                            {% for entry_item in item.entry.entryitem_set.all %}
+                            <tr>
+                                <th class="amount-value">{{ entry_item.total }}</th>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td style="text-align: end;" colspan="6"><b>Total</b></td>
+                    <th style="text-align: end;" class="total amount-value">{{ invoice.total }}</th>
+                </tr>
+            </tfoot>
+        </table>
+        <p style="margin-top: 1.5rem;font-size:1.1rem;display:block;text-align:right">Old pending amount: <b id="old-pending-amount-display">₹ 0</b></p>
+        <p style="margin-top: 0.5rem;font-size:1.1rem;display:block;text-align:right">Total amount pending: <b id="pending-amount-display">₹ 0</b></p>
+    </div>
+
+    <!-- Control card for screen view only -->
+    <div class="control-card">
+        <div class="control-item">
+            <label for="pending-amount">Enter old pending amount:</label>
+            <input type="number" id="pending-amount" placeholder="Enter amount">
+        </div>
+        <button id="print-button">Print Invoice</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Format all amount values with commas
+            const amountElements = document.querySelectorAll('.amount-value');
+            let invoiceTotal = 0;
+            
+            amountElements.forEach(element => {
+                const value = parseFloat(element.textContent.trim());
+                if (!isNaN(value)) {
+                    // Format with commas for Indian number format and add rupee symbol
+                    element.textContent = '₹ ' + formatIndianNumber(value);
+                    
+                    // Store the invoice total value for calculations
+                    if (element.classList.contains('total')) {
+                        invoiceTotal = value;
+                    }
+                }
+            });
+            
+            // Function to format number in Indian format (commas after 3 digits from right, then every 2 digits)
+            function formatIndianNumber(num) {
+                const numStr = num.toString();
+                let afterDecimal = '';
+                let beforeDecimal = numStr;
+                
+                // Handle decimal point if exists
+                if (numStr.includes('.')) {
+                    const parts = numStr.split('.');
+                    beforeDecimal = parts[0];
+                    afterDecimal = '.' + parts[1];
+                }
+                
+                // Format the integer part with commas
+                let formattedNumber = '';
+                const length = beforeDecimal.length;
+                
+                for (let i = 0; i < length; i++) {
+                    if (i === 0) {
+                        formattedNumber = beforeDecimal.charAt(length - 1 - i);
+                    } else if (i === 3 || (i > 3 && (i - 3) % 2 === 0)) {
+                        formattedNumber = ',' + formattedNumber;
+                        formattedNumber = beforeDecimal.charAt(length - 1 - i) + formattedNumber;
+                    } else {
+                        formattedNumber = beforeDecimal.charAt(length - 1 - i) + formattedNumber;
+                    }
+                }
+                
+                return formattedNumber + afterDecimal;
+            }
+
+            // Handle print button click
+            document.getElementById('print-button').addEventListener('click', function() {
+                window.print();
+            });
+            
+            // Handle pending amount updates
+            document.getElementById('pending-amount').addEventListener('input', function() {
+                const oldPendingAmount = parseFloat(this.value) || 0;
+                // Update old pending amount display
+                document.getElementById('old-pending-amount-display').textContent = '₹ ' + formatIndianNumber(oldPendingAmount);
+                
+                // Calculate and update total pending amount (old pending + invoice total)
+                const totalPendingAmount = oldPendingAmount + invoiceTotal;
+                document.getElementById('pending-amount-display').textContent = '₹ ' + formatIndianNumber(totalPendingAmount);
+            });
+        });
+    </script>
+</body>
+
+</html>
