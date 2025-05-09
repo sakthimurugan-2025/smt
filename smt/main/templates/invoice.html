@@ -108,16 +108,14 @@
                 </tr>
             </tfoot>
         </table>
-        <p style="margin-top: 1.5rem;font-size:1.1rem;display:block;text-align:right">Old pending amount: <b id="old-pending-amount-display">₹ 0</b></p>
-        <p style="margin-top: 0.5rem;font-size:1.1rem;display:block;text-align:right">Total amount pending: <b id="pending-amount-display">₹ 0</b></p>
+        {% if old_pending_amount and old_pending_amount != "0.00" %}
+        <p style="margin-top: 1.5rem;font-size:1.1rem;display:block;text-align:right">Old pending amount: <b>₹ <span class="amount-value">{{ old_pending_amount }}</span></b></p>
+        <p style="margin-top: 0.5rem;font-size:1.1rem;display:block;text-align:right">Total amount pending: <b>₹ <span class="amount-value total-pending">{{ total_pending }}</span></b></p>
+        {% endif %}
     </div>
 
     <!-- Control card for screen view only -->
     <div class="control-card">
-        <div class="control-item">
-            <label for="pending-amount">Enter old pending amount:</label>
-            <input type="number" id="pending-amount" placeholder="Enter amount">
-        </div>
         <button id="print-button">Print Invoice</button>
     </div>
 
@@ -125,22 +123,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Format all amount values with commas
             const amountElements = document.querySelectorAll('.amount-value');
-            let invoiceTotal = 0;
             
             amountElements.forEach(element => {
                 const value = parseFloat(element.textContent.trim());
                 if (!isNaN(value)) {
-                    // Format with commas for Indian number format and add rupee symbol
-                    element.textContent = '₹ ' + formatIndianNumber(value);
-                    
-                    // Store the invoice total value for calculations
-                    if (element.classList.contains('total')) {
-                        invoiceTotal = value;
-                    }
+                    // Format with commas for Indian number format
+                    element.textContent = formatIndianNumber(value);
                 }
             });
             
-            // Function to format number in Indian format (commas after 3 digits from right, then every 2 digits)
+            // Function to format number in Indian format
             function formatIndianNumber(num) {
                 const numStr = num.toString();
                 let afterDecimal = '';
@@ -174,17 +166,6 @@
             // Handle print button click
             document.getElementById('print-button').addEventListener('click', function() {
                 window.print();
-            });
-            
-            // Handle pending amount updates
-            document.getElementById('pending-amount').addEventListener('input', function() {
-                const oldPendingAmount = parseFloat(this.value) || 0;
-                // Update old pending amount display
-                document.getElementById('old-pending-amount-display').textContent = '₹ ' + formatIndianNumber(oldPendingAmount);
-                
-                // Calculate and update total pending amount (old pending + invoice total)
-                const totalPendingAmount = oldPendingAmount + invoiceTotal;
-                document.getElementById('pending-amount-display').textContent = '₹ ' + formatIndianNumber(totalPendingAmount);
             });
         });
     </script>

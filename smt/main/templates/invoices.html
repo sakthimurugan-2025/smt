@@ -29,7 +29,6 @@
                         <th>To Date</th>
                         <th>Total Entries</th>
                         <th>Total Amount</th>
-                        <th>Paid Amount</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -52,16 +51,13 @@
                         <td style="text-align: end;"> 
                             ₹ {{ invoice.total }}
                         </td>
-                        <td style="text-align: end;">
-                            ₹ {{ invoice.paid }}
-                        </td>
                         <td>
                             <a href="{% url 'invoice_details' invoice.id %}" class="view-btn">View Details</a>
                         </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="8" class="no-data">No invoices found</td>
+                        <td colspan="7" class="no-data">No invoices found</td>
                     </tr>
                 {% endfor %}
                 </tbody>
