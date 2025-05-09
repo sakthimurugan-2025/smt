@@ -305,20 +305,42 @@ def invoices_view(request):
     })
 
 def display_invoice_view(request, invoice_id):
-    
     invoice = Invoice.objects.get(pk=invoice_id)
     items = invoice.invoiceitem_set.all()[::-1]
-    # recalculate_all_totals_and_counts()
     
-    # Get the party from the first invoice item's entry (if items exist)
     party = None
     if items and len(items) > 0:
         party = items[0].entry.party
+
+    old_pending_amount = 0
+    invoice_total = float(invoice.total) if invoice.total else 0
+    
+    if party:
+        previous_payments = Payment.objects.filter(
+            party=party,
+            date__lt=invoice.f_date
+        ).order_by('date')
+        
+        for payment in previous_payments:
+            if payment.pending_amount:
+                try:
+                    old_pending_amount += float(payment.pending_amount)
+                except (ValueError, TypeError):
+                    pass
+            if payment.received_amount:
+                try:
+                    old_pending_amount -= float(payment.received_amount)
+                except (ValueError, TypeError):
+                    pass
+    
+    total_pending = old_pending_amount + invoice_total
     
     return render(request, "invoice.html", {
         "invoice": invoice,
         "items": items,
         "party": party,
+        "old_pending_amount": "{:.2f}".format(old_pending_amount),
+        "total_pending": "{:.2f}".format(total_pending)
     })
 
 @csrf_exempt
