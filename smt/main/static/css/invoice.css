@@ -75,6 +75,11 @@ body {
 .invoice .main-table .total {
   font-size: 1.2rem;
 }
+.invoice .main-table .table-footer {
+  page-break-inside: avoid;
+  -moz-column-break-inside: avoid;
+       break-inside: avoid;
+}
 .invoice .sub-table {
   border-collapse: collapse;
   width: 100%;

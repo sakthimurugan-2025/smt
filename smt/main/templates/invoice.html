@@ -100,13 +100,11 @@
                     </td>
                 </tr>
                 {% endfor %}
-            </tbody>
-            <tfoot>
-                <tr>
+                <tr class="table-footer">
                     <td style="text-align: end;" colspan="6"><b>Total</b></td>
                     <th style="text-align: end;" class="total amount-value">{{ invoice.total }}</th>
                 </tr>
-            </tfoot>
+            </tbody>
         </table>
         {% if old_pending_amount and old_pending_amount != "0.00" %}
         <p style="margin-top: 1.5rem;font-size:1.1rem;display:block;text-align:right">Old pending amount: <b>₹ <span class="amount-value">{{ old_pending_amount }}</span></b></p>

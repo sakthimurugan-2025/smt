@@ -81,6 +81,11 @@ body{
         .total{
             font-size: 1.2rem;
         }
+
+        .table-footer {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
         
     } 
     .sub-table{
