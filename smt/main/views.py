@@ -314,27 +314,30 @@ def display_invoice_view(request, invoice_id):
 
     old_pending_amount = 0
     invoice_total = float(invoice.total) if invoice.total else 0
+
+    payments = Payment.objects.filter(party=party)
     
-    if party:
-        previous_payments = Payment.objects.filter(
-            party=party,
-            date__lt=invoice.f_date
-        ).order_by('date')
+    credit_sum = 0
+    debit_sum = 0
+    
+    for payment in payments:
+        if payment.pending_amount:
+            try:
+                credit_sum += float(payment.pending_amount)
+            except (ValueError, TypeError):
+                pass
         
-        for payment in previous_payments:
-            if payment.pending_amount:
-                try:
-                    old_pending_amount += float(payment.pending_amount)
-                except (ValueError, TypeError):
-                    pass
-            if payment.received_amount:
-                try:
-                    old_pending_amount -= float(payment.received_amount)
-                except (ValueError, TypeError):
-                    pass
-    
-    total_pending = old_pending_amount + invoice_total
-    
+        if payment.received_amount:
+            try:
+                debit_sum += float(payment.received_amount)
+            except (ValueError, TypeError):
+                pass
+
+
+
+    total_pending = credit_sum - debit_sum
+    old_pending_amount = total_pending - invoice_total
+
     return render(request, "invoice.html", {
         "invoice": invoice,
         "items": items,
