@@ -112,11 +112,44 @@
 
     <!-- Control card for screen view only -->
     <div class="control-card">
+        <div class="control-item">
+            <label for="from-date">Date From:</label>
+            <input type="date" id="from-date" value="{{ invoice.f_date|date:'Y-m-d' }}">
+        </div>
+        <div class="control-item">
+            <label for="to-date">Date To:</label>
+            <input type="date" id="to-date" value="{{ invoice.t_date|date:'Y-m-d' }}">
+        </div>
         <button id="print-button">Print Invoice</button>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Function to format date as DD/MM/YYYY
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+
+            // Format initial dates
+            const fromDateInput = document.getElementById('from-date');
+            const toDateInput = document.getElementById('to-date');
+            document.querySelector('.sec p:nth-child(1) b').textContent = formatDate(fromDateInput.value);
+            document.querySelector('.sec p:nth-child(2) b').textContent = formatDate(toDateInput.value);
+
+            // Date update handlers
+            fromDateInput.addEventListener('change', function(e) {
+                document.querySelector('.sec p:nth-child(1) b').textContent = formatDate(e.target.value);
+            });
+
+            toDateInput.addEventListener('change', function(e) {
+                document.querySelector('.sec p:nth-child(2) b').textContent = formatDate(e.target.value);
+            });
+
             // Format all amount values with commas
             const amountElements = document.querySelectorAll('.amount-value');
             
