@@ -121,6 +121,7 @@ body{
     flex-direction: column;
     gap: 10px;
     z-index: 100;
+    min-width: 200px;
     
     .control-item {
         display: flex;
@@ -137,6 +138,7 @@ body{
             border: 1px solid #ddd;
             border-radius: 4px;
             font-family: "Poppins", sans-serif;
+            width: 100%;
         }
     }
     
